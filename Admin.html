@@ -453,6 +453,18 @@ html.theme-wa .foot h4{font-weight:800}
 @keyframes popin{from{scale:.4;opacity:0}}
 .bnav a.bump svg{animation:popin .45s cubic-bezier(.3,1.6,.5,1)}
 
+.paysel{margin-bottom:12px}
+.pm-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
+.pm-chips .chip{height:32px;padding:0 13px;font-size:13px}
+.pd{animation:rise .35s var(--ease)}
+.pd-det{font-size:13.5px}
+.proof-btn{display:flex;align-items:center;gap:8px;margin-top:10px;padding:10px 12px;border:1px dashed var(--line3);border-radius:12px;color:var(--mute);font-size:13px;font-weight:600;cursor:pointer;transition:border-color .2s,color .2s}
+.proof-btn:hover{border-color:var(--tint);color:var(--txt)}
+.paybar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-top:12px}
+.paybox{margin-top:14px;padding:12px 14px;border-radius:12px;background:var(--s2);border:1px solid var(--line2)}
+.paybox.por_verificar{border-color:color-mix(in srgb,var(--warn) 45%,transparent)}
+.dr-f{max-height:62vh;overflow-y:auto}
+
 /* =================== TRANSICIONES DE ELEMENTO COMPARTIDO (View Transitions) =================== */
 header.top{view-transition-name:hdr}
 .bnav{view-transition-name:bnav}
@@ -579,7 +591,8 @@ const DEFAULTS = {
     { name: 'Binance Pay', details: 'Pay ID: — (USDT)' },
     { name: 'Zinli', details: 'Correo: —' }
   ],
-  minRechargeUsd: 1
+  minRechargeUsd: 1,
+  bsRate: 0
 };
 
 /* ===================================================================== */
@@ -593,6 +606,7 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const EASE = 'cubic-bezier(.2,.8,.2,1)';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+const bsOf = c => { const r = +S?.settings?.bsRate || 0; return r > 0 ? 'Bs ' + (Number(c || 0) / 100 * r).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''; };
 const money = c => '$' + (Number(c || 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const toCents = v => { const n = parseFloat(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? Math.round(n * 100) : NaN; };
 const tsMs = t => !t ? 0 : t.toMillis ? t.toMillis() : t.seconds ? t.seconds * 1000 : typeof t === 'number' ? t : 0;
@@ -611,7 +625,11 @@ const parseAv = a => { const [e, c] = String(a || '').split('|'); return { e: e 
 const avatar = (a, cls = '') => { const v = parseAv(a); return `<span class="av ${cls}" style="--avc:${esc(v.c)}">${esc(v.e)}</span>`; };
 const randomAv = () => AV_EMOJI[Math.floor(Math.random() * AV_EMOJI.length)] + '|' + AV_COLOR[Math.floor(Math.random() * 8)];
 
-const OST = { en_espera: { l: 'En espera', c: 'warn' }, procesado: { l: 'Procesado', c: 'blue' }, completado: { l: 'Completado', c: 'ok' }, reembolsado: { l: 'Reembolsado', c: 'bad' } };
+const OST = { en_espera: { l: 'En espera', c: 'warn' }, procesado: { l: 'Procesado', c: 'blue' }, completado: { l: 'Completado', c: 'ok' }, reembolsado: { l: 'Reembolsado', c: 'bad' }, cancelado: { l: 'Cancelado', c: 'gray' } };
+const PAYST = { por_verificar: { l: 'Pago por verificar', c: 'warn' }, verificado: { l: 'Pago verificado', c: 'ok' }, rechazado: { l: 'Pago rechazado', c: 'bad' } };
+const isDirect = o => o.payMode === 'directo';
+const paidOk = o => !isDirect(o) || o.payStatus === 'verificado';
+const FINAL = s => s === 'reembolsado' || s === 'cancelado';
 const RST = { pendiente: { l: 'Pendiente', c: 'warn' }, aprobada: { l: 'Aprobada', c: 'ok' }, rechazada: { l: 'Rechazada', c: 'bad' } };
 const PST = { disponible: { l: 'Disponible', c: 'ok' }, no_disponible: { l: 'No disponible', c: 'bad' }, pronto: { l: 'Disponible muy pronto', c: 'warn' } };
 const prodState = p => (p.status === 'disponible' && !(p.stock > 0)) ? { l: 'Agotado', c: 'bad' } : (PST[p.status] || PST.no_disponible);
@@ -679,6 +697,7 @@ const LS = {
 
 /* ---------------- estado ---------------- */
 const S = {
+  pay: { mode: 'saldo', m: 0, ref: '', proof: '', proofName: '' },
   route: 'tienda', settings: { ...DEFAULTS }, products: [], productsLoaded: false,
   user: null, profile: null, profileLoaded: false, registering: false,
   myOrders: [], myRecharges: [], myMoves: [],
@@ -1189,17 +1208,36 @@ function renderDrawer(force) {
       ${(p.fields || []).length ? `<div class="ci-f">${p.fields.map(f => `<div><label>${esc(f)}</label><input class="inp inp-sm" data-cf="${idx}" data-fk="${esc(f)}" value="${esc(it.delivery?.[f] || '')}" placeholder="${esc(f)}"></div>`).join('')}</div>` : ''}
     </div>`;
   }).join('');
-  let cta;
+  const pms = S.settings.payMethods || [], P = S.pay, direct = P.mode === 'directo';
+  if (P.m >= pms.length) P.m = 0;
+  const pm = pms[P.m];
+  let cta, payBox = '';
   if (!S.cart.length) cta = `<a class="btn btn-ghost btn-block" href="#/tienda" data-act="close-drawer">Explorar catálogo</a>`;
   else if (!S.user) cta = `<button class="btn btn-pri btn-block" data-act="login">Ingresa para pagar</button>`;
   else if (problems) cta = `<button class="btn btn-pri btn-block" disabled>Revisa los productos marcados</button>`;
-  else if (total > bal) cta = `<a class="btn btn-pri btn-block" href="#/billetera" data-act="close-drawer">Recargar ${money(total - bal)} para pagar</a>`;
+  else if (direct) cta = `<button class="btn btn-pri btn-block" data-act="checkout-direct">Enviar pedido · ${money(total)}</button>`;
+  else if (total > bal) cta = `<button class="btn btn-pri btn-block" data-act="pay-mode" data-m="directo">Pagar ${money(total)} directo</button>
+      <a class="btn btn-quiet btn-block btn-sm" style="margin-top:6px" href="#/billetera" data-act="close-drawer">o recarga ${money(total - bal)} a tu saldo</a>`;
   else cta = `<button class="btn btn-pri btn-block" data-act="checkout">Pagar ${money(total)} con saldo</button>`;
+  if (S.cart.length && S.user && S.profile && pms.length) {
+    payBox = `<div class="paysel">
+      <div class="tabs" style="margin:0 0 12px"><button class="${direct ? '' : 'on'}" data-act="pay-mode" data-m="saldo">Con mi saldo</button><button class="${direct ? 'on' : ''}" data-act="pay-mode" data-m="directo">Pago directo</button></div>
+      ${direct ? `<div class="pd">
+        <div class="pm-chips">${pms.map((m, k) => `<button class="chip ${k === P.m ? 'on' : ''}" data-act="pay-m" data-k="${k}">${esc(m.name)}</button>`).join('')}</div>
+        <div class="infobox pd-det"><div class="row between gap"><span class="small" style="font-weight:700">Paga a:</span><button class="copy" data-act="copy" data-t="${esc(pm?.details || '')}">${icon('copy', 13)} Copiar</button></div>
+          <div class="mono" style="white-space:pre-line;margin-top:4px">${esc(pm?.details || '')}</div>
+          <div class="row between" style="margin-top:8px"><span class="small">Monto exacto</span><b class="mono">${money(total)}${bsOf(total) ? ` <span class="dim small">· ${bsOf(total)}</span>` : ''}</b></div></div>
+        <div style="margin-top:10px"><label class="lb" style="font-size:12px;margin-bottom:5px">Número de referencia *</label><input class="inp inp-sm mono" data-pay="ref" maxlength="60" value="${esc(P.ref)}" placeholder="Últimos dígitos o ID de la transacción"></div>
+        <label class="proof-btn">${icon('image', 15)}<span>${P.proof ? esc(P.proofName || 'Comprobante listo') + ' ✓' : 'Adjuntar capture del pago (opcional)'}</span><input type="file" accept="image/*" data-upload="proof" hidden></label>
+      </div>` : ''}
+    </div>`;
+  }
   setHTML($('#drawer'), 'drawer', `
     <div class="dr-h"><h2>Carrito</h2><button class="mclose" style="position:static" data-act="close-drawer" aria-label="Cerrar">${icon('x', 18)}</button></div>
     <div class="dr-b">${items || `<div class="empty">${icon('cart', 40)}<b>Tu carrito está vacío</b>Agrega productos del catálogo.</div>`}</div>
     <div class="dr-f">
-      ${S.user && S.profile ? `<div class="tot"><span>Tu saldo</span><b class="${total > bal ? 'bad-t' : ''}">${mAnim('drw', bal)}</b></div>` : ''}
+      ${payBox}
+      ${S.user && S.profile && !direct ? `<div class="tot"><span>Tu saldo</span><b class="${total > bal ? 'bad-t' : ''}">${mAnim('drw', bal)}</b></div>` : ''}
       <div class="tot big"><span>Total</span><b>${money(total)}</b></div>
       ${cta}
     </div>`, force);
@@ -1228,14 +1266,7 @@ async function checkout(btn) {
   if (!S.user) return openAuth();
   if (!S.profile) return toast('Completa tu perfil primero', 'bad');
   if (S.profile.banned) return toast('Tu cuenta está suspendida. Contáctanos por WhatsApp.', 'bad');
-  for (const it of S.cart) {
-    const p = prod(it.pid);
-    for (const f of (p?.fields || [])) if (!String(it.delivery?.[f] || '').trim()) {
-      const el = $(`[data-cf="${S.cart.indexOf(it)}"][data-fk="${CSS.escape(f)}"]`);
-      if (el) { el.focus(); if (!REDUCED) el.animate([{ translate: '0' }, { translate: '-5px' }, { translate: '5px' }, { translate: '-3px' }, { translate: '0' }], { duration: 320 }); }
-      return toast(`Falta "${f}" para ${p.name}`, 'bad');
-    }
-  }
+  if (!missingFields()) return;
   await busy(btn, async () => {
     const done = [], fail = [];
     for (const it of [...S.cart]) {
@@ -1258,7 +1289,59 @@ async function checkout(btn) {
     } else if (fail.length) toast(fail[0], 'bad', 6000);
   });
 }
-async function buyOne(it) {
+async function checkoutDirect(btn) {
+  if (!S.user) return openAuth();
+  if (!S.profile) return toast('Completa tu perfil primero', 'bad');
+  if (S.profile.banned) return toast('Tu cuenta está suspendida. Contáctanos por WhatsApp.', 'bad');
+  if (!missingFields()) return;
+  const P = S.pay, pm = (S.settings.payMethods || [])[P.m];
+  if (!pm) return toast('Elige un método de pago', 'bad');
+  const ref = P.ref.trim();
+  if (ref.length < 3) { const el = $('[data-pay="ref"]'); el?.focus(); shake(el); return toast('Escribe el número de referencia del pago', 'bad'); }
+  await busy(btn, async () => {
+    const { total } = cartTotals(), group = doc(collection(db, 'proofs')).id;
+    const done = [], fail = [];
+    if (P.proof) {
+      try { await setDoc(doc(db, 'proofs', group), { uid: S.user.uid, img: P.proof, createdAt: serverTimestamp() }); }
+      catch (e) { toast('No se pudo subir el capture: ' + errMsg(e), 'bad'); }
+    }
+    for (const it of [...S.cart]) {
+      const p = prod(it.pid);
+      try {
+        const id = await buyOne(it, { payMode: 'directo', payMethod: pm.name.slice(0, 40), payRef: ref.slice(0, 60), payStatus: 'por_verificar', payGroup: group, payTotalCents: total, hasProof: !!P.proof });
+        done.push({ id, name: p?.name, qty: it.qty }); S.cart = S.cart.filter(x => x !== it); saveCart();
+      } catch (e) { fail.push(`${p?.name || 'Producto'}: ${errMsg(e)}`); }
+    }
+    renderHeader(); renderBottomNav();
+    if (done.length) {
+      S.pay = { mode: 'saldo', m: P.m, ref: '', proof: '', proofName: '' };
+      renderDrawer(true); closeDrawer();
+      const msg = `Hola, hice un pedido en ${S.settings.storeName} y pagué por ${pm.name}.\nReferencia: ${ref}\nMonto: ${money(total)}${bsOf(total) ? ' (' + bsOf(total) + ')' : ''}\nPedidos: ${done.map(d => '#' + shortId(d.id)).join(', ')}`;
+      openModal(`<div style="text-align:center">
+        <div class="ok-ic" style="width:60px;height:60px;border-radius:50%;margin:6px auto 16px;display:grid;place-items:center;background:var(--pri-bg);color:#fff;box-shadow:var(--pri-sh)"><svg class="check-draw" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></div>
+        <h2>Pedido recibido</h2>
+        <p class="muted" style="margin:6px 0 18px">Verificaremos tu pago por <b style="color:var(--txt)">${esc(pm.name)}</b> (ref. <span class="mono">${esc(ref)}</span>) y luego procesamos tu pedido. Puedes seguirlo en Mis pedidos.</p>
+        <div class="card" style="text-align:left;margin-bottom:16px;padding:6px 16px">${done.map(d => `<div class="row between small" style="padding:9px 0"><span>${esc(d.name)} × ${d.qty}</span><span class="oc-id">#${shortId(d.id)}</span></div>`).join('')}</div>
+        ${fail.length ? `<div class="errbox" style="text-align:left">No se pudo pedir:<br>${fail.map(esc).join('<br>')}</div>` : ''}
+        <div class="row gap"><a class="btn btn-pri grow" href="#/pedidos" data-act="close-modal">Ver mis pedidos</a>
+        <a class="btn btn-ghost" target="_blank" rel="noopener" href="${waLink(msg)}">${icon('wa', 17)} Enviar comprobante</a></div></div>`);
+      burst($('#modal .mbox'));
+    } else { renderDrawer(true); if (fail.length) toast(fail[0], 'bad', 6000); }
+  });
+}
+function shake(el) { if (el && !REDUCED) el.animate([{ translate: '0' }, { translate: '-5px' }, { translate: '5px' }, { translate: '-3px' }, { translate: '0' }], { duration: 320 }); }
+function missingFields() {
+  for (const it of S.cart) {
+    const p = prod(it.pid);
+    for (const f of (p?.fields || [])) if (!String(it.delivery?.[f] || '').trim()) {
+      const el = $(`[data-cf="${S.cart.indexOf(it)}"][data-fk="${CSS.escape(f)}"]`);
+      if (el) { el.focus(); shake(el); }
+      toast(`Falta "${f}" para ${p.name}`, 'bad'); return false;
+    }
+  }
+  return true;
+}
+async function buyOne(it, direct) {
   const uid = S.user.uid;
   const pref = doc(db, 'products', it.pid), uref = doc(db, 'users', uid), oref = doc(collection(db, 'orders'));
   await runTransaction(db, async tx => {
@@ -1268,13 +1351,13 @@ async function buyOne(it) {
     if (p.status !== 'disponible' || p.hidden) throw new Error('No disponible');
     if ((p.stock || 0) < it.qty) throw new Error(`Solo quedan ${p.stock || 0}`);
     const total = p.priceCents * it.qty;
-    if ((u.balanceCents || 0) < total) throw new Error('Saldo insuficiente');
+    if (!direct && (u.balanceCents || 0) < total) throw new Error('Saldo insuficiente');
     const delivery = {}; (p.fields || []).forEach(f => delivery[f] = String(it.delivery?.[f] || '').trim().slice(0, 200));
     tx.set(oref, {
       uid, email: S.user.email, nickname: u.nickname, pid: it.pid, pname: p.name, category: p.category || '',
-      qty: it.qty, priceCents: p.priceCents, totalCents: total, delivery, status: 'en_espera', createdAt: serverTimestamp()
+      qty: it.qty, priceCents: p.priceCents, totalCents: total, delivery, status: 'en_espera', createdAt: serverTimestamp(), ...(direct || {})
     });
-    tx.update(uref, { balanceCents: u.balanceCents - total, lastOrderId: oref.id });
+    if (!direct) tx.update(uref, { balanceCents: u.balanceCents - total, lastOrderId: oref.id });
     tx.update(pref, { stock: p.stock - it.qty, lastOrderId: oref.id });
   });
   return oref.id;
@@ -1339,7 +1422,7 @@ function vWallet() {
   const pend = S.myRecharges.filter(r => r.status === 'pendiente');
   const moves = [
     ...S.myMoves.map(m => ({ t: tsMs(m.createdAt), amt: m.amountCents, title: m.type === 'recarga' ? 'Recarga aprobada' : m.type === 'reembolso' ? 'Reembolso' : 'Ajuste de saldo', sub: m.note || '', ic: m.amountCents >= 0 ? 'down' : 'up' })),
-    ...S.myOrders.map(o => ({ t: tsMs(o.createdAt), amt: -o.totalCents, title: `Compra · ${o.pname}${o.qty > 1 ? ' ×' + o.qty : ''}`, sub: `Pedido #${shortId(o.id)}`, ic: 'cart' }))
+    ...S.myOrders.filter(o => !isDirect(o)).map(o => ({ t: tsMs(o.createdAt), amt: -o.totalCents, title: `Compra · ${o.pname}${o.qty > 1 ? ' ×' + o.qty : ''}`, sub: `Pedido #${shortId(o.id)}`, ic: 'cart' }))
   ].sort((a, b) => b.t - a.t);
   let i = 0;
   return `
@@ -1357,6 +1440,7 @@ function vWallet() {
         <form data-form="recharge">
           <div class="field"><label class="lb">Método de pago</label>
             <select class="sel" name="method" id="rc-method">${pms.map((m, k) => `<option value="${k}">${esc(m.name)}</option>`).join('')}</select></div>
+          ${+s.bsRate > 0 ? `<p class="tiny dim" style="margin:-6px 0 10px">Tasa para pagos en bolívares: Bs ${(+s.bsRate).toLocaleString('es-VE', { minimumFractionDigits: 2 })} por dólar</p>` : ''}
           <div class="infobox mono" id="rc-details" style="margin-bottom:16px;white-space:pre-line;font-size:13px">${esc(pms[0]?.details || '')}</div>
           <div class="field"><label class="lb">Monto (USD)</label><input class="inp mono" name="amount" inputmode="decimal" placeholder="10.00" required></div>
           <div class="field"><label class="lb">Número de referencia</label><input class="inp mono" name="reference" maxlength="60" placeholder="Últimos dígitos o ID de la transacción" required></div>
@@ -1381,6 +1465,7 @@ function vWallet() {
 /* ---------------- pedidos ---------------- */
 function stepsHTML(st) {
   if (st === 'reembolsado') return `<div class="infobox" style="margin-top:14px">Pedido reembolsado: el monto volvió a tu billetera.</div>`;
+  if (st === 'cancelado') return `<div class="infobox" style="margin-top:14px">Pedido cancelado: no pudimos verificar el pago. Escríbenos por WhatsApp si crees que es un error.</div>`;
   const order = ['en_espera', 'procesado', 'completado'], i = order.indexOf(st);
   return `<div class="steps">${order.map((s, k) => `${k ? `<div class="st-l ${k <= i ? 'on' : ''}"></div>` : ''}<div class="st ${k <= i ? 'on' : ''}"><i>${k < i || st === 'completado' ? '✓' : k + 1}</i>${OST[s].l}</div>`).join('')}</div>`;
 }
@@ -1392,6 +1477,7 @@ function vOrders() {
     <div class="oc-h"><span class="oc-id">#${shortId(o.id)}</span><span class="pill ${OST[o.status]?.c || 'gray'}"><i></i>${OST[o.status]?.l || o.status}</span><span class="dim small" style="margin-left:auto">${fdate(o.createdAt)}</span></div>
     <div class="row between" style="margin-top:12px;gap:12px"><div><b style="font-size:16px;font-weight:600">${esc(o.pname)}</b> <span class="dim">× ${o.qty}</span><div class="tiny dim">${esc(o.category || '')}</div></div><b class="mono" style="font-size:17px;font-weight:500">${money(o.totalCents)}</b></div>
     ${Object.keys(o.delivery || {}).length ? `<dl class="kv" style="margin-top:12px">${Object.entries(o.delivery).map(([k, v]) => `<dt>${esc(k)}</dt><dd class="mono">${esc(v)}</dd>`).join('')}</dl>` : ''}
+    ${isDirect(o) ? `<div class="paybar"><span class="pill ${PAYST[o.payStatus]?.c || 'gray'}"><i></i>${PAYST[o.payStatus]?.l || ''}</span><span class="small muted">${esc(o.payMethod)} · ref <span class="mono">${esc(o.payRef)}</span></span></div>` : ''}
     ${stepsHTML(o.status)}
     ${o.deliveredInfo ? `<div class="deliver"><div class="row between"><span class="small" style="font-weight:500">Datos de tu pedido</span><button class="copy" data-act="copy" data-t="${esc(o.deliveredInfo)}">${icon('copy', 13)} Copiar</button></div><pre>${esc(o.deliveredInfo)}</pre></div>` : ''}
     ${o.adminNote ? `<p class="small muted" style="margin-top:10px">Nota: ${esc(o.adminNote)}</p>` : ''}
@@ -1485,7 +1571,8 @@ function vAdmin() {
   ${body()}`;
 }
 function aSummary() {
-  const O = S.admin.orders, valid = O.filter(o => o.status !== 'reembolsado');
+  const O = S.admin.orders, valid = O.filter(o => !FINAL(o.status) && paidOk(o));
+  const payPend = O.filter(o => isDirect(o) && o.payStatus === 'por_verificar' && !FINAL(o.status));
   const todayL = valid.filter(o => isToday(o.createdAt));
   const sales = valid.reduce((a, o) => a + o.totalCents, 0), today = todayL.reduce((a, o) => a + o.totalCents, 0);
   const wallets = S.admin.users.reduce((a, u) => a + (u.balanceCents || 0), 0);
@@ -1494,8 +1581,9 @@ function aSummary() {
   let i = 0;
   return `<div class="stats">
     <div class="card stat" data-i="${i++}"><span>Ventas hoy</span><b>${mAnim('a-today', today)}</b><small>${todayL.length} pedidos</small></div>
-    <div class="card stat" data-i="${i++}"><span>Ventas totales</span><b>${mAnim('a-sales', sales)}</b><small>${valid.length} pedidos sin reembolsos</small></div>
+    <div class="card stat" data-i="${i++}"><span>Ventas totales</span><b>${mAnim('a-sales', sales)}</b><small>${valid.length} pedidos pagados</small></div>
     <div class="card stat" data-i="${i++}"><span>Pedidos en espera</span><b class="${pendingOrders() ? 'warn-t' : ''}">${pendingOrders()}</b><small>${O.filter(o => o.status === 'procesado').length} procesados sin completar</small></div>
+    <div class="card stat" data-i="${i++}"><span>Pagos directos por verificar</span><b class="${payPend.length ? 'warn-t' : ''}">${new Set(payPend.map(o => o.payGroup)).size}</b><small>${money(payPend.reduce((a, o) => a + o.totalCents, 0))} en pedidos</small></div>
     <div class="card stat" data-i="${i++}"><span>Recargas pendientes</span><b class="${pendingRech() ? 'warn-t' : ''}">${pendingRech()}</b><small>${money(S.admin.recharges.filter(r => r.status === 'pendiente').reduce((a, r) => a + r.amountCents, 0))} por verificar</small></div>
     <div class="card stat" data-i="${i++}"><span>Saldo en billeteras</span><b>${mAnim('a-wal', wallets)}</b><small>${money(appr)} recargado en total</small></div>
     <div class="card stat" data-i="${i++}"><span>Usuarios</span><b>${S.admin.users.length}</b><small>${S.admin.users.filter(u => isToday(u.createdAt)).length} nuevos hoy</small></div>
@@ -1517,10 +1605,19 @@ function aOrders() {
 function aOrdersList() {
   const q = S.aq.trim().toLowerCase();
   let list = S.admin.orders.filter(o => S.aOrderF === 'todos' || o.status === S.aOrderF);
-  if (q) list = list.filter(o => `${o.id} ${o.pname} ${o.nickname} ${o.email} ${Object.values(o.delivery || {}).join(' ')}`.toLowerCase().includes(q));
+  if (q) list = list.filter(o => `${o.id} ${o.pname} ${o.nickname} ${o.email} ${o.payRef || ''} ${o.payMethod || ''} ${Object.values(o.delivery || {}).join(' ')}`.toLowerCase().includes(q));
   if (!list.length) return `<div class="card empty">${icon('box', 36)}<b>Sin pedidos aquí</b></div>`;
   return list.slice(0, 150).map((o, i) => {
-    const ref = o.status === 'reembolsado';
+    const ref = FINAL(o.status), dir = isDirect(o), unpaid = dir && o.payStatus !== 'verificado';
+    const grp = dir ? S.admin.orders.filter(x => x.payGroup === o.payGroup) : [];
+    const payHTML = dir ? `<div class="paybox ${o.payStatus}">
+        <div class="row between gap wrapf"><span class="small" style="font-weight:700">Pago directo · ${esc(o.payMethod)}</span><span class="pill ${PAYST[o.payStatus]?.c}"><i></i>${PAYST[o.payStatus]?.l}</span></div>
+        <dl class="kv" style="margin-top:8px"><dt>Referencia</dt><dd class="mono">${esc(o.payRef)}<button class="copy" data-act="copy" data-t="${esc(o.payRef)}" aria-label="Copiar">${icon('copy', 12)}</button></dd>
+          <dt>Monto total</dt><dd class="mono">${money(o.payTotalCents)}${bsOf(o.payTotalCents) ? ` · ${bsOf(o.payTotalCents)}` : ''}${grp.length > 1 ? ` <span class="dim">(${grp.length} pedidos en este pago)</span>` : ''}</dd></dl>
+        <div class="row gap wrapf" style="margin-top:10px">
+          ${o.hasProof ? `<button class="btn btn-xs btn-ghost" data-act="see-proof" data-g="${esc(o.payGroup)}">${icon('image', 14)} Ver capture</button>` : '<span class="tiny dim">Sin capture adjunto</span>'}
+          ${o.payStatus === 'por_verificar' && !ref ? `<button class="btn btn-xs btn-pri" data-act="pay-ok" data-g="${esc(o.payGroup)}">${icon('check', 14)} Confirmar pago</button><button class="btn btn-xs btn-bad" data-act="pay-no" data-g="${esc(o.payGroup)}">Rechazar pago</button>` : ''}
+        </div></div>` : '';
     return `<div class="card ac" data-i="${i}">
     <div class="oc-h"><span class="oc-id">#${shortId(o.id)}</span><span class="pill ${OST[o.status]?.c}"><i></i>${OST[o.status]?.l}</span><span class="dim small">${fdate(o.createdAt)}</span>
       <span style="margin-left:auto" class="row gap">${avatar(userById(o.uid)?.avatar, 'sm')}<span><b style="font-weight:500">${esc(o.nickname)}</b><div class="tiny dim">${esc(o.email)}</div></span></span></div>
@@ -1529,9 +1626,10 @@ function aOrdersList() {
         <div class="row between"><b style="font-size:15.5px;font-weight:600">${esc(o.pname)} <span class="dim" style="font-weight:400">× ${o.qty}</span></b><b class="mono" style="font-weight:500">${money(o.totalCents)}</b></div>
         <div class="tiny dim" style="margin-bottom:10px">${esc(o.category)} · ${money(o.priceCents)} c/u</div>
         ${Object.keys(o.delivery || {}).length ? `<dl class="kv">${Object.entries(o.delivery).map(([k, v]) => `<dt>${esc(k)}</dt><dd class="mono">${esc(v)}<button class="copy" data-act="copy" data-t="${esc(v)}" aria-label="Copiar">${icon('copy', 12)}</button></dd>`).join('')}</dl>` : '<p class="tiny dim">Sin datos de entrega.</p>'}
+        ${payHTML}
         <div class="row gap wrapf" style="margin-top:16px">
-          <select class="sel sel-sm" data-chg="ostatus" data-id="${o.id}" ${ref ? 'disabled' : ''}>${Object.entries(OST).filter(([k]) => k !== 'reembolsado' || ref).map(([k, v]) => `<option value="${k}" ${o.status === k ? 'selected' : ''}>${v.l}</option>`).join('')}</select>
-          ${ref ? '' : `<button class="btn btn-xs btn-bad" data-act="refund" data-id="${o.id}">${icon('undo', 14)} Reembolsar</button>`}
+          <select class="sel sel-sm" data-chg="ostatus" data-id="${o.id}" ${ref ? 'disabled' : ''}>${Object.entries(OST).filter(([k]) => !FINAL(k) || o.status === k).map(([k, v]) => `<option value="${k}" ${o.status === k ? 'selected' : ''}>${v.l}</option>`).join('')}</select>
+          ${ref || unpaid ? '' : `<button class="btn btn-xs btn-bad" data-act="refund" data-id="${o.id}">${icon('undo', 14)} Reembolsar al saldo</button>`}
         </div>
       </div>
       <div>
@@ -1653,6 +1751,7 @@ function aSettings() {
     <div class="card pad" data-i="1">
       <h3 class="h3" style="margin-bottom:16px">Pagos y catálogo</h3>
       <div class="field"><label class="lb">Métodos de recarga</label><textarea class="ta mono" name="payMethods" style="min-height:120px;font-size:13.5px">${esc((s.payMethods || []).map(m => `${m.name} | ${m.details}`).join('\n'))}</textarea><div class="hint">Uno por línea: <b>Nombre | datos para pagar</b></div></div>
+      <div class="field"><label class="lb">Tasa en bolívares (Bs por 1 USD)</label><input class="inp mono" name="bsRate" inputmode="decimal" value="${esc(s.bsRate || '')}" placeholder="Ej: 40.50"><div class="hint">Opcional. Si la pones, al pagar se muestra el monto en Bs para Pago Móvil. Vacío o 0 = solo dólares.</div></div>
       <div class="field"><label class="lb">Recarga mínima (USD)</label><input class="inp mono" name="minRechargeUsd" inputmode="decimal" value="${esc(s.minRechargeUsd)}"></div>
       <div class="field"><label class="lb">Categorías (en orden)</label><input class="inp" name="categories" value="${esc((s.categories || []).join(', '))}"><div class="hint">Separadas por coma.</div></div>
       <button class="btn btn-pri btn-block" type="submit">Guardar ajustes</button>
@@ -1830,10 +1929,38 @@ const ACT = {
   'logo-clear': () => { setLogo = ''; $('#logo-prev').innerHTML = DEFAULT_LOGO; },
   'save-deliver': el => busy(el, async () => {
     const id = el.dataset.id, info = $('#di-' + id)?.value.trim() || '';
+    const ord = S.admin.orders.find(x => x.id === id);
+    if (el.dataset.done && ord && !paidOk(ord)) return toast('Primero verifica el pago directo de este pedido', 'bad');
     const upd = { deliveredInfo: info, updatedAt: serverTimestamp() };
     if (el.dataset.done) { if (!info && !(await confirmBox('¿Completar sin datos?', 'El cliente no verá datos de entrega.', 'Completar'))) return; upd.status = 'completado'; }
     try { await updateDoc(doc(db, 'orders', id), upd); DIRTY.delete('#di-' + id); toast(el.dataset.done ? 'Pedido completado' : 'Entrega guardada'); } catch (e) { toast(errMsg(e), 'bad'); }
   }),
+  'pay-mode': el => { S.pay.mode = el.dataset.m; renderDrawer(true); },
+  'pay-m': el => { S.pay.m = +el.dataset.k; renderDrawer(true); },
+  'checkout-direct': el => checkoutDirect(el),
+  'see-proof': async el => {
+    try {
+      const sn = await getDoc(doc(db, 'proofs', el.dataset.g));
+      if (!sn.exists()) return toast('No se encontró el capture', 'bad');
+      openModal(`<button class="mclose" data-act="close-modal" aria-label="Cerrar">${icon('x', 18)}</button><h2>Capture del pago</h2><img src="${esc(sn.data().img)}" alt="Capture del pago" style="margin-top:14px;border-radius:14px;width:100%;height:auto">`, 'wide');
+    } catch (e) { toast(errMsg(e), 'bad'); }
+  },
+  'pay-ok': async el => {
+    const g = el.dataset.g, grp = S.admin.orders.filter(o => o.payGroup === g && o.payStatus === 'por_verificar' && !FINAL(o.status));
+    if (!grp.length) return;
+    const o = grp[0];
+    if (!(await confirmBox('Confirmar pago', `¿Recibiste <b>${money(o.payTotalCents)}</b>${bsOf(o.payTotalCents) ? ` (${bsOf(o.payTotalCents)})` : ''} por <b>${esc(o.payMethod)}</b> con referencia <b class="mono">${esc(o.payRef)}</b>?<br>Se marcarán como pagados ${grp.length} pedido(s).`, 'Sí, pago recibido'))) return;
+    try { const b = writeBatch(db); grp.forEach(x => b.update(doc(db, 'orders', x.id), { payStatus: 'verificado', payCheckedBy: S.profile.nickname, updatedAt: serverTimestamp() })); await b.commit(); toast('Pago verificado. Ya puedes procesar el pedido'); }
+    catch (e) { toast(errMsg(e), 'bad'); }
+  },
+  'pay-no': async el => {
+    const g = el.dataset.g, grp = S.admin.orders.filter(o => o.payGroup === g && !FINAL(o.status));
+    if (!grp.length) return;
+    const r = await confirmBox('Rechazar pago', `Se cancelarán ${grp.length} pedido(s) y las unidades vuelven al stock.`, 'Rechazar y cancelar', `<div class="field"><label class="lb">Motivo (lo verá el cliente)</label><input class="inp" name="note" placeholder="Ej: referencia no encontrada"></div>`);
+    if (!r) return;
+    try { for (const x of grp) await cancelOrder(x.id, r.note); toast('Pago rechazado y pedidos cancelados', 'info'); }
+    catch (e) { toast(errMsg(e), 'bad'); }
+  },
   'refund': async el => {
     const o = S.admin.orders.find(x => x.id === el.dataset.id); if (!o) return;
     const r = await confirmBox('Reembolsar pedido', `Se devolverán <b>${money(o.totalCents)}</b> a la billetera de <b>${esc(o.nickname)}</b> y el pedido quedará como Reembolsado.`, 'Reembolsar',
@@ -1889,6 +2016,7 @@ document.addEventListener('keydown', e => {
 document.addEventListener('input', e => {
   const t = e.target; markDirty(t);
   if (t.id === 'q') { S.q = t.value; setGrid(); return; }
+  if (t.dataset.pay) { S.pay[t.dataset.pay] = t.value; return; }
   if (t.dataset.cf != null) { const it = S.cart[+t.dataset.cf]; if (it) { (it.delivery ||= {})[t.dataset.fk] = t.value; saveCart(); } return; }
   if (t.hasAttribute('data-asearch')) { S.aq = t.value; const fn = { pedidos: aOrdersList, recargas: aRechList, usuarios: aUsersList }[S.atab]; if (fn) $('#alist').innerHTML = fn(); return; }
   if (t.form?.dataset.form === 'product') { if (t.name === 'imageUrl') pfImage = t.value.trim(); updatePfPreview(); }
@@ -1899,7 +2027,8 @@ document.addEventListener('change', async e => {
   if (t.dataset.upload) {
     const file = t.files?.[0]; t.value = ''; if (!file) return;
     try {
-      if (t.dataset.upload === 'product') { pfImage = await fileToDataUrl(file, 960, 960, 'image/webp', .84); const f = $('#modal form[data-form="product"]'); if (f) f.imageUrl.value = ''; updatePfPreview(); }
+      if (t.dataset.upload === 'proof') { S.pay.proof = await fileToDataUrl(file, 1100, 1600, 'image/jpeg', .72); S.pay.proofName = file.name.slice(0, 40); renderDrawer(true); toast('Capture adjuntado'); }
+      else if (t.dataset.upload === 'product') { pfImage = await fileToDataUrl(file, 960, 960, 'image/webp', .84); const f = $('#modal form[data-form="product"]'); if (f) f.imageUrl.value = ''; updatePfPreview(); }
       else { setLogo = await fileToDataUrl(file, 256, 256, file.type === 'image/svg+xml' ? 'image/png' : 'image/webp', .9); $('#logo-prev').innerHTML = `<img src="${setLogo}" alt="">`; }
     } catch (err) { toast(err.message, 'bad'); }
     return;
@@ -1907,6 +2036,7 @@ document.addEventListener('change', async e => {
   if (t.form?.dataset.form === 'product') { updatePfPreview(); return; }
   const k = t.dataset.chg; if (!k) return;
   try {
+    if (k === 'ostatus' && ['procesado', 'completado'].includes(t.value)) { const o = S.admin.orders.find(x => x.id === t.dataset.id); if (o && !paidOk(o)) { t.value = o.status; return toast('Primero verifica el pago directo de este pedido', 'bad'); } }
     if (k === 'ostatus') { await updateDoc(doc(db, 'orders', t.dataset.id), { status: t.value, updatedAt: serverTimestamp() }); toast(`Pedido → ${OST[t.value].l}`); }
     if (k === 'pstatus') { await updateDoc(doc(db, 'products', t.dataset.id), { status: t.value }); toast(`Estado → ${PST[t.value].l}`); }
     if (k === 'stkset') { const n = Math.max(0, parseInt(t.value) || 0); clearTimeout(STK_T[t.dataset.id]); delete STK[t.dataset.id]; await updateDoc(doc(db, 'products', t.dataset.id), { stock: n }); toast('Stock actualizado'); }
@@ -2074,6 +2204,7 @@ const FORMS = {
       storeName: f.storeName.value.trim() || DEFAULTS.storeName, tagline: f.tagline.value.trim(), logoUrl: setLogo || '',
       whatsapp: f.whatsapp.value.replace(/\D/g, '') || DEFAULTS.whatsapp, heroTitle: f.heroTitle.value.trim(), heroText: f.heroText.value.trim(),
       announcement: f.announcement.value.trim(), minRechargeUsd: +String(f.minRechargeUsd.value).replace(',', '.') || 0,
+      bsRate: Math.max(0, +String(f.bsRate.value).replace(',', '.') || 0),
       payMethods: f.payMethods.value.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const [n, ...r] = l.split('|'); return { name: n.trim(), details: r.join('|').trim() }; }),
       categories: f.categories.value.split(',').map(s => s.trim()).filter(Boolean)
     };
@@ -2096,10 +2227,20 @@ async function approveRecharge(id, cents) {
     tx.set(doc(collection(db, 'movements')), { uid: r.uid, type: 'recarga', amountCents: cents, note: `${r.method} · Ref ${r.reference}`, ref: id, by: S.profile.nickname, createdAt: serverTimestamp() });
   });
 }
+async function cancelOrder(id, note) {
+  await runTransaction(db, async tx => {
+    const oref = doc(db, 'orders', id), os = await tx.get(oref), o = os.data();
+    if (FINAL(o.status)) return;
+    const pref = doc(db, 'products', o.pid), ps = await tx.get(pref);
+    tx.update(oref, { status: 'cancelado', payStatus: 'rechazado', adminNote: note || '', updatedAt: serverTimestamp(), payCheckedBy: S.profile.nickname });
+    if (ps.exists()) tx.update(pref, { stock: increment(o.qty) });
+  });
+}
 async function refundOrder(id, restock, note) {
   await runTransaction(db, async tx => {
     const oref = doc(db, 'orders', id), os = await tx.get(oref);
-    const o = os.data(); if (o.status === 'reembolsado') throw new Error('Ya fue reembolsado');
+    const o = os.data(); if (FINAL(o.status)) throw new Error('Este pedido ya está cerrado');
+    if (isDirect(o) && o.payStatus !== 'verificado') throw new Error('El pago no está verificado: usa "Rechazar pago"');
     const pref = doc(db, 'products', o.pid), ps = restock ? await tx.get(pref) : null;
     tx.update(oref, { status: 'reembolsado', adminNote: note || '', refundedAt: serverTimestamp(), updatedAt: serverTimestamp() });
     tx.update(doc(db, 'users', o.uid), { balanceCents: increment(o.totalCents) });
