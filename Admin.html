@@ -1463,8 +1463,11 @@ function vWallet() {
 }
 
 /* ---------------- pedidos ---------------- */
-function stepsHTML(st) {
-  if (st === 'reembolsado') return `<div class="infobox" style="margin-top:14px">Pedido reembolsado: el monto volvió a tu billetera.</div>`;
+function refundsHTML(o) {
+  return (o.refunds || []).map(x => `<div class="infobox" style="margin-top:12px">Reembolso de <b>${money(x.cents)}</b>${x.units ? ` (${x.units} unidad${x.units > 1 ? 'es' : ''})` : ''}: ${x.to === 'saldo' ? 'acreditado a tu saldo.' : `te lo devolvimos por fuera${o.payMethod ? ' (' + esc(o.payMethod) + ')' : ''}${x.ref ? ` · ref. <span class="mono">${esc(x.ref)}</span>` : ''}.`}${x.note ? `<div class="small muted" style="margin-top:4px">${esc(x.note)}</div>` : ''}</div>`).join('');
+}
+function stepsHTML(st, o = {}) {
+  if (st === 'reembolsado') return (o.refunds || []).length ? '' : `<div class="infobox" style="margin-top:14px">Pedido reembolsado: el monto volvió a tu billetera.</div>`;
   if (st === 'cancelado') return `<div class="infobox" style="margin-top:14px">Pedido cancelado: no pudimos verificar el pago. Escríbenos por WhatsApp si crees que es un error.</div>`;
   const order = ['en_espera', 'procesado', 'completado'], i = order.indexOf(st);
   return `<div class="steps">${order.map((s, k) => `${k ? `<div class="st-l ${k <= i ? 'on' : ''}"></div>` : ''}<div class="st ${k <= i ? 'on' : ''}"><i>${k < i || st === 'completado' ? '✓' : k + 1}</i>${OST[s].l}</div>`).join('')}</div>`;
@@ -1478,7 +1481,7 @@ function vOrders() {
     <div class="row between" style="margin-top:12px;gap:12px"><div><b style="font-size:16px;font-weight:600">${esc(o.pname)}</b> <span class="dim">× ${o.qty}</span><div class="tiny dim">${esc(o.category || '')}</div></div><b class="mono" style="font-size:17px;font-weight:500">${money(o.totalCents)}</b></div>
     ${Object.keys(o.delivery || {}).length ? `<dl class="kv" style="margin-top:12px">${Object.entries(o.delivery).map(([k, v]) => `<dt>${esc(k)}</dt><dd class="mono">${esc(v)}</dd>`).join('')}</dl>` : ''}
     ${isDirect(o) ? `<div class="paybar"><span class="pill ${PAYST[o.payStatus]?.c || 'gray'}"><i></i>${PAYST[o.payStatus]?.l || ''}</span><span class="small muted">${esc(o.payMethod)} · ref <span class="mono">${esc(o.payRef)}</span></span></div>` : ''}
-    ${stepsHTML(o.status)}
+    ${stepsHTML(o.status, o)}${refundsHTML(o)}
     ${o.deliveredInfo ? `<div class="deliver"><div class="row between"><span class="small" style="font-weight:500">Datos de tu pedido</span><button class="copy" data-act="copy" data-t="${esc(o.deliveredInfo)}">${icon('copy', 13)} Copiar</button></div><pre>${esc(o.deliveredInfo)}</pre></div>` : ''}
     ${o.adminNote ? `<p class="small muted" style="margin-top:10px">Nota: ${esc(o.adminNote)}</p>` : ''}
   </div>`).join('') : `<div class="card empty">${icon('box', 40)}<b>Aún no tienes pedidos</b>Cuando compres algo, aparecerá aquí con su estado.<div style="margin-top:18px"><a class="btn btn-pri" href="#/tienda">Ir a la tienda</a></div></div>`}`;
@@ -1629,8 +1632,9 @@ function aOrdersList() {
         ${payHTML}
         <div class="row gap wrapf" style="margin-top:16px">
           <select class="sel sel-sm" data-chg="ostatus" data-id="${o.id}" ${ref ? 'disabled' : ''}>${Object.entries(OST).filter(([k]) => !FINAL(k) || o.status === k).map(([k, v]) => `<option value="${k}" ${o.status === k ? 'selected' : ''}>${v.l}</option>`).join('')}</select>
-          ${ref || unpaid ? '' : `<button class="btn btn-xs btn-bad" data-act="refund" data-id="${o.id}">${icon('undo', 14)} Reembolsar al saldo</button>`}
+          ${ref || unpaid ? '' : `<button class="btn btn-xs btn-bad" data-act="refund" data-id="${o.id}">${icon('undo', 14)} Reembolsar</button>`}
         </div>
+        ${(o.refunds || []).map(x => `<div class="tiny dim" style="margin-top:8px">↩ ${money(x.cents)} · ${x.units} u. · ${x.to === 'saldo' ? 'al saldo' : 'por fuera'}${x.ref ? ' · ref ' + esc(x.ref) : ''} · ${esc(x.by || '')}</div>`).join('')}
       </div>
       <div>
         <label class="lb">Datos a entregar al cliente</label>
@@ -1880,7 +1884,7 @@ function confirmBox(title, text, okLabel = 'Confirmar', extra = '') {
   return new Promise(res => {
     openModal(`<form id="cb-form"><h2>${title}</h2><p class="muted" style="margin:8px 0 18px">${text}</p>${extra}<div class="row gap" style="justify-content:flex-end;margin-top:6px"><button type="button" class="btn btn-ghost" id="cb-no">Cancelar</button><button type="submit" class="btn btn-pri" id="cb-ok">${okLabel}</button></div></form>`, '', () => res(false));
     $('#cb-no').onclick = () => closeModal();
-    $('#cb-form').onsubmit = e => { e.preventDefault(); const data = Object.fromEntries($$('#modal [name]').map(x => [x.name, x.type === 'checkbox' ? x.checked : x.value])); res(data); closeModal(); };
+    $('#cb-form').onsubmit = e => { e.preventDefault(); const data = Object.fromEntries($$('#modal [name]').filter(x => x.type !== 'radio' || x.checked).map(x => [x.name, x.type === 'checkbox' ? x.checked : x.value])); res(data); closeModal(); };
     setTimeout(() => ($('#modal input') || $('#cb-ok'))?.focus(), 60);
   });
 }
@@ -1956,17 +1960,27 @@ const ACT = {
   'pay-no': async el => {
     const g = el.dataset.g, grp = S.admin.orders.filter(o => o.payGroup === g && !FINAL(o.status));
     if (!grp.length) return;
-    const r = await confirmBox('Rechazar pago', `Se cancelarán ${grp.length} pedido(s) y las unidades vuelven al stock.`, 'Rechazar y cancelar', `<div class="field"><label class="lb">Motivo (lo verá el cliente)</label><input class="inp" name="note" placeholder="Ej: referencia no encontrada"></div>`);
+    const r = await confirmBox('Rechazar pago', `Se cancelarán ${grp.length} pedido(s).`, 'Rechazar y cancelar', `<label class="row gap small" style="margin-bottom:4px"><input type="checkbox" name="restock" checked> Devolver las unidades al stock</label><div class="hint" style="margin:0 0 14px">Desmárcalo si el stock estaba mal y no tienes esas unidades.</div><div class="field"><label class="lb">Motivo (lo verá el cliente)</label><input class="inp" name="note" placeholder="Ej: referencia no encontrada"></div>`);
     if (!r) return;
-    try { for (const x of grp) await cancelOrder(x.id, r.note); toast('Pago rechazado y pedidos cancelados', 'info'); }
+    try { for (const x of grp) await cancelOrder(x.id, r.note, r.restock); toast('Pago rechazado y pedidos cancelados', 'info'); }
     catch (e) { toast(errMsg(e), 'bad'); }
   },
   'refund': async el => {
     const o = S.admin.orders.find(x => x.id === el.dataset.id); if (!o) return;
-    const r = await confirmBox('Reembolsar pedido', `Se devolverán <b>${money(o.totalCents)}</b> a la billetera de <b>${esc(o.nickname)}</b> y el pedido quedará como Reembolsado.`, 'Reembolsar',
-      `<label class="row gap small" style="margin-bottom:14px;color:var(--mute)"><input type="checkbox" name="restock" checked> Devolver ${o.qty} unidad(es) al stock de ${esc(o.pname)}</label><div class="field"><label class="lb">Motivo (lo verá el cliente)</label><input class="inp" name="note" placeholder="Opcional"></div>`);
+    const toDef = isDirect(o) ? 'externo' : 'saldo';
+    const r = await confirmBox('Reembolsar', `<b>${esc(o.pname)}</b> × ${o.qty} · ${money(o.priceCents)} c/u · cliente <b>${esc(o.nickname)}</b>`, 'Reembolsar',
+      `${o.qty > 1 ? `<div class="field"><label class="lb">¿Cuántas unidades reembolsas?</label><select class="sel" name="units">${Array.from({ length: o.qty }, (_, k) => o.qty - k).map(n => `<option value="${n}">${n} de ${o.qty} · ${money(o.priceCents * n)}${n === o.qty ? ' (todo el pedido)' : ''}</option>`).join('')}</select><div class="hint">Si reembolsas solo una parte, el pedido sigue activo con las unidades restantes.</div></div>` : ''}
+      <div class="field"><label class="lb">¿Cómo le devuelves el dinero?</label>
+        <label class="row gap small" style="margin:4px 0 8px"><input type="radio" name="to" value="saldo" ${toDef === 'saldo' ? 'checked' : ''}> A su saldo en la tienda (se acredita al instante)</label>
+        <label class="row gap small"><input type="radio" name="to" value="externo" ${toDef === 'externo' ? 'checked' : ''}> Se lo devolví por fuera (Pago Móvil, Binance, Zinli…)</label></div>
+      <div class="field"><label class="lb">Referencia de la devolución (si fue por fuera)</label><input class="inp mono" name="rref" maxlength="60" placeholder="Opcional"></div>
+      <label class="row gap small" style="margin-bottom:4px"><input type="checkbox" name="restock" checked> Devolver las unidades al stock</label>
+      <div class="hint" style="margin:0 0 14px">Desmárcalo si el stock estaba mal y en realidad no tienes esas unidades.</div>
+      <div class="field"><label class="lb">Motivo (lo verá el cliente)</label><input class="inp" name="note" placeholder="Ej: nos quedamos sin pantallas disponibles"></div>`);
     if (!r) return;
-    try { await refundOrder(o.id, r.restock, r.note); toast('Reembolso aplicado'); } catch (e) { toast(errMsg(e), 'bad'); }
+    const units = Math.min(o.qty, Math.max(1, parseInt(r.units || o.qty)));
+    try { await refundOrder(o.id, { units, restock: r.restock, to: r.to || toDef, rref: (r.rref || '').trim(), note: (r.note || '').trim() }); toast(units < o.qty ? `Reembolsadas ${units} unidad(es)` : 'Pedido reembolsado'); }
+    catch (e) { toast(errMsg(e), 'bad'); }
   },
   'rc-ok': async el => {
     const rc = S.admin.recharges.find(x => x.id === el.dataset.id); if (!rc) return;
@@ -2227,25 +2241,33 @@ async function approveRecharge(id, cents) {
     tx.set(doc(collection(db, 'movements')), { uid: r.uid, type: 'recarga', amountCents: cents, note: `${r.method} · Ref ${r.reference}`, ref: id, by: S.profile.nickname, createdAt: serverTimestamp() });
   });
 }
-async function cancelOrder(id, note) {
+async function cancelOrder(id, note, restock = true) {
   await runTransaction(db, async tx => {
     const oref = doc(db, 'orders', id), os = await tx.get(oref), o = os.data();
     if (FINAL(o.status)) return;
     const pref = doc(db, 'products', o.pid), ps = await tx.get(pref);
     tx.update(oref, { status: 'cancelado', payStatus: 'rechazado', adminNote: note || '', updatedAt: serverTimestamp(), payCheckedBy: S.profile.nickname });
-    if (ps.exists()) tx.update(pref, { stock: increment(o.qty) });
+    if (restock && ps.exists()) tx.update(pref, { stock: increment(o.qty) });
   });
 }
-async function refundOrder(id, restock, note) {
+async function refundOrder(id, { units, restock, to, rref, note }) {
   await runTransaction(db, async tx => {
     const oref = doc(db, 'orders', id), os = await tx.get(oref);
     const o = os.data(); if (FINAL(o.status)) throw new Error('Este pedido ya está cerrado');
     if (isDirect(o) && o.payStatus !== 'verificado') throw new Error('El pago no está verificado: usa "Rechazar pago"');
+    units = Math.min(o.qty, Math.max(1, units || o.qty));
+    const amount = o.priceCents * units, full = units >= o.qty;
     const pref = doc(db, 'products', o.pid), ps = restock ? await tx.get(pref) : null;
-    tx.update(oref, { status: 'reembolsado', adminNote: note || '', refundedAt: serverTimestamp(), updatedAt: serverTimestamp() });
-    tx.update(doc(db, 'users', o.uid), { balanceCents: increment(o.totalCents) });
-    if (restock && ps?.exists()) tx.update(pref, { stock: increment(o.qty) });
-    tx.set(doc(collection(db, 'movements')), { uid: o.uid, type: 'reembolso', amountCents: o.totalCents, note: `Pedido #${shortId(id)} · ${o.pname}${note ? ' · ' + note : ''}`, ref: id, by: S.profile.nickname, createdAt: serverTimestamp() });
+    const log = [...(o.refunds || []), { units, cents: amount, to, ref: rref || '', note: note || '', at: Date.now(), by: S.profile.nickname }];
+    tx.update(oref, {
+      ...(full ? { status: 'reembolsado', refundedAt: serverTimestamp() } : { qty: o.qty - units, totalCents: o.totalCents - amount }),
+      refunds: log, refundedCents: (o.refundedCents || 0) + amount, ...(note ? { adminNote: note } : {}), updatedAt: serverTimestamp()
+    });
+    if (to === 'saldo') {
+      tx.update(doc(db, 'users', o.uid), { balanceCents: increment(amount) });
+      tx.set(doc(collection(db, 'movements')), { uid: o.uid, type: 'reembolso', amountCents: amount, note: `Pedido #${shortId(id)} · ${o.pname}${units < o.qty ? ` · ${units} unidad(es)` : ''}${note ? ' · ' + note : ''}`, ref: id, by: S.profile.nickname, createdAt: serverTimestamp() });
+    }
+    if (restock && ps?.exists()) tx.update(pref, { stock: increment(units) });
   });
 }
 async function adjustBalance(uid, cents, note) {
