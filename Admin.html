@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="es" data-mode="admin">
+<html lang="es" data-mode="tienda">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>NRDIGITAL · Panel</title>
-<meta name="robots" content="noindex, nofollow">
+<title>NRDIGITAL · Tienda digital</title>
+<meta name="description" content="Cuentas de streaming, recargas de juegos y gift cards con entrega rápida. Paga con tu saldo.">
 <meta name="theme-color" content="#09090b">
 <script>(function(){var d=document.documentElement;if(d.dataset.mode==='admin')return;d.classList.add('theme-wa');var m=document.querySelector('meta[name=theme-color]');if(m)m.content='#0e0d20';})();</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236a00ff'/%3E%3Cstop offset='1' stop-color='%237686ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='36' height='36' rx='11' fill='url(%23g)'/%3E%3Cpath d='M11 26V11l12 15V11' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Crect x='25.5' y='7' width='4' height='4' rx='1.2' fill='%23fff' opacity='.85'/%3E%3C/svg%3E">
@@ -454,6 +454,33 @@ html.theme-wa .foot h4{font-weight:800}
 .bnav a.bump svg{animation:popin .45s cubic-bezier(.3,1.6,.5,1)}
 
 .paysel{margin-bottom:12px}
+.pinfo{background:var(--s2);border:1px solid var(--line2);border-radius:14px;padding:12px 14px}
+html.theme-wa .pinfo{background:var(--soft);border-color:color-mix(in srgb,#7686ff 40%,transparent)}
+.pkv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin-top:8px;font-size:13.5px}
+.pkv dt{color:var(--mute)}.pkv dd{display:flex;align-items:center;justify-content:space-between;gap:6px;word-break:break-all;font-weight:700}
+.pamt{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-top:10px;padding-top:10px;border-top:1px dashed var(--line3)}
+.pamt-v{text-align:right;display:flex;flex-direction:column;align-items:flex-end}
+.pbig{font-size:19px;font-weight:900;letter-spacing:-.01em}
+.rate-chip{display:inline-flex;align-items:center;gap:7px;margin-top:12px;padding:6px 12px;border-radius:999px;background:var(--soft);color:var(--soft-txt);font-size:13px;font-weight:700}
+.rate-chip b{color:var(--txt)}
+.rate-card{display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap;margin-bottom:12px}
+.pm-list{display:grid;gap:12px;margin-top:16px}
+.pm-ed{border:1px solid var(--line2);border-radius:14px;padding:14px;background:var(--bg2);transition:opacity .2s}
+.pm-ed.off{opacity:.55}
+.pm-fields{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;margin-top:12px}
+.pm-fields .full{grid-column:1/-1}
+.pm-fields .lb{font-size:12px;margin-bottom:5px}
+.clickrow{cursor:pointer}
+.mbox.ud{width:min(760px,100%)}
+.ud-stats{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin:18px 0 14px}
+.ud-stats div{background:var(--s2);border:1px solid var(--line2);border-radius:12px;padding:10px 12px}
+.ud-stats span{display:block;font-size:12px;color:var(--mute)}
+.ud-stats b{font-size:18px;font-weight:600}
+.ud-list{max-height:44vh;overflow-y:auto;overscroll-behavior:contain}
+.ud-it{display:flex;gap:12px;align-items:flex-start;padding:12px 2px;border-top:1px solid var(--line)}
+.ud-it:first-child{border-top:0}
+.ud-it b{font-weight:600}
+.hide-d{display:none}
 .pm-chips{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px}
 .pm-chips .chip{height:32px;padding:0 13px;font-size:13px}
 .pd{animation:rise .35s var(--ease)}
@@ -526,6 +553,9 @@ html.vt-page::view-transition-new(root){animation:vt-in .42s .1s cubic-bezier(.2
   .tbl.resp tr{display:grid;grid-template-columns:1fr auto;gap:8px 10px;padding:14px;border-bottom:1px solid var(--line)}
   .tbl.resp td{border:0;padding:0}
   .tbl.resp td.full{grid-column:1/-1}
+  .hide-d{display:inline}
+  .ud-stats{grid-template-columns:repeat(2,1fr)}
+  .rate-card form{width:100%}.rate-card form .inp{flex:1;width:auto!important}
   html.theme-wa .top-in{height:58px;padding:0 8px 0 18px;border-radius:22px;width:calc(100% - 20px)}
   html.theme-wa header.top{padding:8px 0 6px;background:var(--bg)}
   html.theme-wa .cat-bar{top:72px}
@@ -573,8 +603,8 @@ const FIREBASE_CONFIG = {
   appId: "1:172668471762:web:59d09810de7116dc05a00b"
 };
 
-/* Este archivo es el PANEL DE ADMINISTRACIÓN. La tienda es index.html (mismo código, MODE = 'tienda'). */
-const MODE = 'admin';
+/* Este archivo es la TIENDA. El panel de administración es admin.html (mismo código, MODE = 'admin'). */
+const MODE = 'tienda';
 
 /* Valores por defecto (todo esto se puede cambiar luego en Panel → Ajustes) */
 const DEFAULTS = {
@@ -587,9 +617,9 @@ const DEFAULTS = {
   announcement: '',
   categories: ['Streaming', 'Juegos', 'Gift Cards', 'Software'],
   payMethods: [
-    { name: 'Pago Móvil', details: 'Banco: — · Teléfono: — · C.I.: —' },
-    { name: 'Binance Pay', details: 'Pay ID: — (USDT)' },
-    { name: 'Zinli', details: 'Correo: —' }
+    { type: 'pagomovil', name: 'Pago Móvil', currency: 'BS', data: {} },
+    { type: 'binance', name: 'Binance Pay', currency: 'USD', data: {} },
+    { type: 'zinli', name: 'Zinli', currency: 'USD', data: {} }
   ],
   minRechargeUsd: 1,
   bsRate: 0
@@ -598,7 +628,7 @@ const DEFAULTS = {
 /* ===================================================================== */
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js';
 import { getAuth, initializeAuth, inMemoryPersistence, onAuthStateChanged, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, sendPasswordResetEmail, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js';
-import { getFirestore, doc, collection, getDoc, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, query, where, orderBy, limit, runTransaction, writeBatch, serverTimestamp, increment } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
+import { getFirestore, doc, collection, getDoc, getDocs, setDoc, updateDoc, deleteDoc, addDoc, onSnapshot, query, where, orderBy, limit, runTransaction, writeBatch, serverTimestamp, increment } from 'https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js';
 
 /* ---------------- utilidades ---------------- */
 const $ = (s, r = document) => r.querySelector(s);
@@ -606,7 +636,30 @@ const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const REDUCED = matchMedia('(prefers-reduced-motion: reduce)').matches;
 const EASE = 'cubic-bezier(.2,.8,.2,1)';
 const esc = s => String(s ?? '').replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-const bsOf = c => { const r = +S?.settings?.bsRate || 0; return r > 0 ? 'Bs ' + (Number(c || 0) / 100 * r).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 }) : ''; };
+const RATE = () => +S?.settings?.bsRate || 0;
+const fmtRate = r => Number(r || 0).toLocaleString('es-VE', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+const bsAt = (c, r) => r > 0 ? 'Bs ' + fmtRate(Number(c || 0) / 100 * r) : '';
+const bsOf = c => bsAt(c, RATE());
+/* Métodos de pago: cada tipo tiene sus propios datos */
+const PM_TYPES = {
+  pagomovil: { l: 'Pago Móvil', cur: 'BS', f: [['banco', 'Banco'], ['telefono', 'Teléfono'], ['cedula', 'Cédula / RIF'], ['titular', 'Titular']] },
+  binance: { l: 'Binance Pay', cur: 'USD', f: [['payid', 'Pay ID'], ['usuario', 'Usuario o correo'], ['titular', 'Titular']] },
+  zinli: { l: 'Zinli', cur: 'USD', f: [['correo', 'Correo'], ['titular', 'Titular']] },
+  transferencia: { l: 'Transferencia', cur: 'BS', f: [['banco', 'Banco'], ['cuenta', 'Número de cuenta'], ['cedula', 'Cédula / RIF'], ['titular', 'Titular']] },
+  usdt: { l: 'USDT (wallet)', cur: 'USD', f: [['red', 'Red (TRC20, BEP20…)'], ['wallet', 'Dirección de wallet']] },
+  paypal: { l: 'PayPal', cur: 'USD', f: [['correo', 'Correo']] },
+  otro: { l: 'Otro', cur: 'USD', f: [['detalle', 'Datos para pagar']] }
+};
+const normPM = (m, i) => {
+  if (!m) return null;
+  const type = PM_TYPES[m.type] ? m.type : 'otro', data = { ...(m.data || {}) };
+  if (!m.type && m.details) data.detalle = m.details;
+  return { id: m.id || 'pm' + i, type, name: m.name || PM_TYPES[type].l, currency: m.currency === 'BS' || m.currency === 'USD' ? m.currency : PM_TYPES[type].cur, data, note: m.note || '', active: m.active !== false };
+};
+const allPMs = () => (S.settings.payMethods || []).map(normPM).filter(Boolean);
+const activePMs = () => allPMs().filter(m => m.active);
+const pmRows = m => PM_TYPES[m.type].f.map(([k, l]) => [l, String(m.data[k] || '').trim()]).filter(([, v]) => v);
+const pmText = m => pmRows(m).map(([l, v]) => `${l}: ${v}`).join('\n');
 const money = c => '$' + (Number(c || 0) / 100).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 const toCents = v => { const n = parseFloat(String(v ?? '').replace(',', '.')); return Number.isFinite(n) ? Math.round(n * 100) : NaN; };
 const tsMs = t => !t ? 0 : t.toMillis ? t.toMillis() : t.seconds ? t.seconds * 1000 : typeof t === 'number' ? t : 0;
@@ -697,7 +750,7 @@ const LS = {
 
 /* ---------------- estado ---------------- */
 const S = {
-  pay: { mode: 'saldo', m: 0, ref: '', proof: '', proofName: '' },
+  pay: { mode: 'saldo', m: 0, ref: '', proof: '', proofName: '' }, pmEdit: null, ud: null,
   route: 'tienda', settings: { ...DEFAULTS }, products: [], productsLoaded: false,
   user: null, profile: null, profileLoaded: false, registering: false,
   myOrders: [], myRecharges: [], myMoves: [],
@@ -862,7 +915,7 @@ addEventListener('pointerup', ptrUp, true); addEventListener('pointercancel', pt
 const DIRTY = new Map();
 const keyOf = el => el.dataset?.keep || (el.id ? '#' + el.id : (el.form?.dataset.form && el.name ? el.form.dataset.form + '|' + el.name : null));
 function markDirty(el) {
-  if (!el.closest || !el.closest('#view') || el.dataset.chg || el.dataset.upload || el.id === 'q' || el.hasAttribute('data-asearch')) return;
+  if (!el.closest || !el.closest('#view') || el.dataset.pm != null || el.dataset.chg || el.dataset.upload || el.id === 'q' || el.hasAttribute('data-asearch')) return;
   const k = keyOf(el); if (k) DIRTY.set(k, el.type === 'checkbox' ? el.checked : el.value);
 }
 function restoreDirty() {
@@ -873,7 +926,7 @@ function restoreDirty() {
     if (!el || el.disabled) return;
     if (el.type === 'checkbox') el.checked = v; else el.value = v;
   });
-  if ($('#rc-method')) $('#rc-details').textContent = S.settings.payMethods?.[+$('#rc-method').value]?.details || '';
+  if ($('#rc-method')) updateRcInfo();
 }
 const clearDirty = prefix => { [...DIRTY.keys()].forEach(k => { if (!prefix || k.startsWith(prefix)) DIRTY.delete(k); }); };
 function flushPending() { if (pendingView && !viewBusy()) renderView(); if (pendingDrawer && !drawerBusy()) renderDrawer(); }
@@ -983,7 +1036,7 @@ function renderFooter() {
   const s = S.settings;
   $('#footer').innerHTML = `<div class="foot">
     <div><div class="brand" style="margin-bottom:12px">${brandHTML(false)}</div><p style="max-width:360px">Productos digitales con entrega rápida. Precios en dólares (USD); pagas con el saldo de tu billetera.</p></div>
-    <div><h4>Métodos de recarga</h4><ul>${(s.payMethods || []).map(m => `<li>${esc(m.name)}</li>`).join('')}</ul></div>
+    <div><h4>Métodos de pago</h4><ul>${activePMs().map(m => `<li>${esc(m.name)}</li>`).join('')}</ul></div>
     <div><h4>Soporte</h4><ul><li><a href="${waLink()}" target="_blank" rel="noopener">WhatsApp ${esc(fmtPhone(s.whatsapp))}</a></li><li><a href="#/pedidos">Mis pedidos</a></li><li><a href="#/billetera">Recargar saldo</a></li></ul></div>
   </div><p class="dim tiny" style="margin-top:28px">© ${new Date().getFullYear()} ${esc(s.storeName)}. Las marcas mostradas pertenecen a sus respectivos dueños.</p>`;
 }
@@ -1039,7 +1092,8 @@ function vStore() {
   return `
   <section class="hero">
     <div>
-      <p class="kicker"><i></i>Entrega rápida · Pagas con tu saldo</p>
+      <p class="kicker"><i></i>Entrega rápida · Paga con saldo, Pago Móvil, Binance o Zinli</p>
+      ${rateChip()}
       <h1>${title}</h1>
       <p class="lead">${esc(s.heroText)}</p>
       <div class="hero-cta">
@@ -1137,7 +1191,7 @@ function openProduct(id, cardEl) {
       <p class="muted" style="margin:10px 0 18px;white-space:pre-line">${esc(p.description || 'Sin descripción.')}</p>
       ${fields.length ? `<div class="infobox" style="margin-bottom:18px">Al pagar te pediremos: <b>${fields.map(esc).join(', ')}</b></div>` : ''}
       <div class="row between gap wrapf prow">
-        <span class="price pm-price" style="font-size:24px">${money(p.priceCents)}</span>
+        <span><span class="price pm-price" style="font-size:24px">${money(p.priceCents)}</span>${RATE() ? `<span class="tiny dim" style="display:block">≈ ${bsOf(p.priceCents)}</span>` : ''}</span>
         ${ok ? `<div class="row gap"><div class="qty"><button data-act="pm-qty" data-d="-1" aria-label="Menos">${icon('minus', 15)}</button><span id="pmq">1</span><button data-act="pm-qty" data-d="1" data-max="${p.stock}" aria-label="Más">${icon('plus', 15)}</button></div>
           <button class="btn btn-pri" data-act="pm-add" data-id="${p.id}">${icon('cart', 17)} Agregar</button></div>`
       : `<a class="btn btn-ghost" target="_blank" rel="noopener" href="${waLink('Hola, quiero saber cuándo estará disponible: ' + p.name)}">${icon('wa', 17)} Avisarme por WhatsApp</a>`}
@@ -1170,6 +1224,23 @@ function addToCart(id, qty = 1, srcEl, btn) {
   }
   if (REDUCED || !srcEl) toast(`${p.name} agregado al carrito`);
 }
+
+/* ---- datos de pago que ve el cliente (cada dato con su botón copiar + monto exacto) ---- */
+function payInfoHTML(m, cents) {
+  if (!m) return `<div class="infobox">Aún no hay métodos de pago configurados. Escríbenos por WhatsApp.</div>`;
+  const rows = pmRows(m), rate = RATE(), bs = m.currency === 'BS';
+  let amt = '';
+  if (cents > 0) amt = bs
+    ? (rate > 0 ? `<b class="pbig">${bsOf(cents)}</b><span class="tiny dim">${money(cents)} · tasa Bs ${fmtRate(rate)}</span>` : `<b class="pbig">${money(cents)}</b><span class="tiny warn-t">Pregunta la tasa por WhatsApp</span>`)
+    : `<b class="pbig">${money(cents)}</b>${m.type === 'binance' || m.type === 'usdt' ? '<span class="tiny dim">en USDT</span>' : ''}`;
+  return `<div class="pinfo">
+    <div class="row between gap"><span class="small" style="font-weight:800">Paga a · ${esc(m.name)}</span>${rows.length > 1 ? `<button class="copy" data-act="copy" data-t="${esc(pmText(m))}">${icon('copy', 13)} Copiar todo</button>` : ''}</div>
+    ${rows.length ? `<dl class="pkv">${rows.map(([l, v]) => `<dt>${esc(l)}</dt><dd><span class="mono">${esc(v)}</span><button class="copy" data-act="copy" data-t="${esc(v)}" aria-label="Copiar ${esc(l)}">${icon('copy', 12)}</button></dd>`).join('')}</dl>` : '<p class="small warn-t" style="margin-top:6px">Datos aún no configurados. Escríbenos por WhatsApp.</p>'}
+    ${m.note ? `<p class="tiny muted" style="margin-top:6px">${esc(m.note)}</p>` : ''}
+    ${amt ? `<div class="pamt"><span class="small">Monto exacto a pagar</span><div class="pamt-v">${amt}</div></div>` : ''}
+  </div>`;
+}
+function rateChip() { const r = RATE(); return r > 0 ? `<span class="rate-chip">${icon('coins', 14)} Tasa del día: <b>Bs ${fmtRate(r)}</b></span>` : ''; }
 
 /* ---------------- carrito ---------------- */
 function drawerBusy() { if (ptrDown) return true; const a = document.activeElement; return S.drawerOpen && a && $('#drawer').contains(a) && /^(INPUT|TEXTAREA)$/.test(a.tagName); }
@@ -1208,7 +1279,7 @@ function renderDrawer(force) {
       ${(p.fields || []).length ? `<div class="ci-f">${p.fields.map(f => `<div><label>${esc(f)}</label><input class="inp inp-sm" data-cf="${idx}" data-fk="${esc(f)}" value="${esc(it.delivery?.[f] || '')}" placeholder="${esc(f)}"></div>`).join('')}</div>` : ''}
     </div>`;
   }).join('');
-  const pms = S.settings.payMethods || [], P = S.pay, direct = P.mode === 'directo';
+  const pms = activePMs(), P = S.pay, direct = P.mode === 'directo';
   if (P.m >= pms.length) P.m = 0;
   const pm = pms[P.m];
   let cta, payBox = '';
@@ -1224,9 +1295,7 @@ function renderDrawer(force) {
       <div class="tabs" style="margin:0 0 12px"><button class="${direct ? '' : 'on'}" data-act="pay-mode" data-m="saldo">Con mi saldo</button><button class="${direct ? 'on' : ''}" data-act="pay-mode" data-m="directo">Pago directo</button></div>
       ${direct ? `<div class="pd">
         <div class="pm-chips">${pms.map((m, k) => `<button class="chip ${k === P.m ? 'on' : ''}" data-act="pay-m" data-k="${k}">${esc(m.name)}</button>`).join('')}</div>
-        <div class="infobox pd-det"><div class="row between gap"><span class="small" style="font-weight:700">Paga a:</span><button class="copy" data-act="copy" data-t="${esc(pm?.details || '')}">${icon('copy', 13)} Copiar</button></div>
-          <div class="mono" style="white-space:pre-line;margin-top:4px">${esc(pm?.details || '')}</div>
-          <div class="row between" style="margin-top:8px"><span class="small">Monto exacto</span><b class="mono">${money(total)}${bsOf(total) ? ` <span class="dim small">· ${bsOf(total)}</span>` : ''}</b></div></div>
+        <div class="pd-det">${payInfoHTML(pm, total)}</div>
         <div style="margin-top:10px"><label class="lb" style="font-size:12px;margin-bottom:5px">Número de referencia *</label><input class="inp inp-sm mono" data-pay="ref" maxlength="60" value="${esc(P.ref)}" placeholder="Últimos dígitos o ID de la transacción"></div>
         <label class="proof-btn">${icon('image', 15)}<span>${P.proof ? esc(P.proofName || 'Comprobante listo') + ' ✓' : 'Adjuntar capture del pago (opcional)'}</span><input type="file" accept="image/*" data-upload="proof" hidden></label>
       </div>` : ''}
@@ -1238,7 +1307,7 @@ function renderDrawer(force) {
     <div class="dr-f">
       ${payBox}
       ${S.user && S.profile && !direct ? `<div class="tot"><span>Tu saldo</span><b class="${total > bal ? 'bad-t' : ''}">${mAnim('drw', bal)}</b></div>` : ''}
-      <div class="tot big"><span>Total</span><b>${money(total)}</b></div>
+      <div class="tot big"><span>Total</span><span style="text-align:right"><b>${money(total)}</b>${total && RATE() ? `<div class="tiny dim">${bsOf(total)}</div>` : ''}</span></div>
       ${cta}
     </div>`, force);
   runMoneyAnims();
@@ -1294,7 +1363,7 @@ async function checkoutDirect(btn) {
   if (!S.profile) return toast('Completa tu perfil primero', 'bad');
   if (S.profile.banned) return toast('Tu cuenta está suspendida. Contáctanos por WhatsApp.', 'bad');
   if (!missingFields()) return;
-  const P = S.pay, pm = (S.settings.payMethods || [])[P.m];
+  const P = S.pay, pm = activePMs()[P.m];
   if (!pm) return toast('Elige un método de pago', 'bad');
   const ref = P.ref.trim();
   if (ref.length < 3) { const el = $('[data-pay="ref"]'); el?.focus(); shake(el); return toast('Escribe el número de referencia del pago', 'bad'); }
@@ -1308,7 +1377,7 @@ async function checkoutDirect(btn) {
     for (const it of [...S.cart]) {
       const p = prod(it.pid);
       try {
-        const id = await buyOne(it, { payMode: 'directo', payMethod: pm.name.slice(0, 40), payRef: ref.slice(0, 60), payStatus: 'por_verificar', payGroup: group, payTotalCents: total, hasProof: !!P.proof });
+        const id = await buyOne(it, { payMode: 'directo', payMethod: pm.name.slice(0, 40), payRef: ref.slice(0, 60), payStatus: 'por_verificar', payGroup: group, payTotalCents: total, hasProof: !!P.proof, payRate: RATE(), payCurrency: pm.currency });
         done.push({ id, name: p?.name, qty: it.qty }); S.cart = S.cart.filter(x => x !== it); saveCart();
       } catch (e) { fail.push(`${p?.name || 'Producto'}: ${errMsg(e)}`); }
     }
@@ -1316,7 +1385,7 @@ async function checkoutDirect(btn) {
     if (done.length) {
       S.pay = { mode: 'saldo', m: P.m, ref: '', proof: '', proofName: '' };
       renderDrawer(true); closeDrawer();
-      const msg = `Hola, hice un pedido en ${S.settings.storeName} y pagué por ${pm.name}.\nReferencia: ${ref}\nMonto: ${money(total)}${bsOf(total) ? ' (' + bsOf(total) + ')' : ''}\nPedidos: ${done.map(d => '#' + shortId(d.id)).join(', ')}`;
+      const msg = `Hola, hice un pedido en ${S.settings.storeName} y pagué por ${pm.name}.\nReferencia: ${ref}\nMonto: ${pm.currency === 'BS' && bsOf(total) ? bsOf(total) + ' (' + money(total) + ')' : money(total)}\nPedidos: ${done.map(d => '#' + shortId(d.id)).join(', ')}`;
       openModal(`<div style="text-align:center">
         <div class="ok-ic" style="width:60px;height:60px;border-radius:50%;margin:6px auto 16px;display:grid;place-items:center;background:var(--pri-bg);color:#fff;box-shadow:var(--pri-sh)"><svg class="check-draw" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></div>
         <h2>Pedido recibido</h2>
@@ -1418,7 +1487,7 @@ function openCompleteProfile() {
 function vWallet() {
   if (!S.user) return needLogin('Tu billetera', 'Inicia sesión para recargar saldo y comprar al instante.');
   if (!S.profile) return `<div class="empty"><span class="spin"></span></div>`;
-  const s = S.settings, pms = s.payMethods || [];
+  const s = S.settings, pms = activePMs();
   const pend = S.myRecharges.filter(r => r.status === 'pendiente');
   const moves = [
     ...S.myMoves.map(m => ({ t: tsMs(m.createdAt), amt: m.amountCents, title: m.type === 'recarga' ? 'Recarga aprobada' : m.type === 'reembolso' ? 'Reembolso' : 'Ajuste de saldo', sub: m.note || '', ic: m.amountCents >= 0 ? 'down' : 'up' })),
@@ -1426,7 +1495,7 @@ function vWallet() {
   ].sort((a, b) => b.t - a.t);
   let i = 0;
   return `
-  <div class="page-h"><div><h1>Billetera</h1><p>Recarga saldo una vez y compra en segundos.</p></div></div>
+  <div class="page-h"><div><h1>Billetera</h1><p>Recarga saldo una vez y compra en segundos.</p></div>${rateChip()}</div>
   <div class="two">
     <div>
       <div class="balance-card" data-i="${i++}">
@@ -1440,9 +1509,8 @@ function vWallet() {
         <form data-form="recharge">
           <div class="field"><label class="lb">Método de pago</label>
             <select class="sel" name="method" id="rc-method">${pms.map((m, k) => `<option value="${k}">${esc(m.name)}</option>`).join('')}</select></div>
-          ${+s.bsRate > 0 ? `<p class="tiny dim" style="margin:-6px 0 10px">Tasa para pagos en bolívares: Bs ${(+s.bsRate).toLocaleString('es-VE', { minimumFractionDigits: 2 })} por dólar</p>` : ''}
-          <div class="infobox mono" id="rc-details" style="margin-bottom:16px;white-space:pre-line;font-size:13px">${esc(pms[0]?.details || '')}</div>
-          <div class="field"><label class="lb">Monto (USD)</label><input class="inp mono" name="amount" inputmode="decimal" placeholder="10.00" required></div>
+          <div class="field"><label class="lb">Monto a recargar (USD)</label><input class="inp mono" name="amount" id="rc-amount" inputmode="decimal" placeholder="10.00" required><div class="hint">Es lo que se acreditará a tu saldo.</div></div>
+          <div id="rc-info" style="margin-bottom:16px">${payInfoHTML(pms[0], 0)}</div>
           <div class="field"><label class="lb">Número de referencia</label><input class="inp mono" name="reference" maxlength="60" placeholder="Últimos dígitos o ID de la transacción" required></div>
           <div class="field"><label class="lb">Nota (opcional)</label><input class="inp" name="note" maxlength="140" placeholder="Ej: pagué en Bs desde Banesco"></div>
           <button class="btn btn-pri btn-block" type="submit">Reportar pago</button>
@@ -1529,15 +1597,15 @@ function startAdmin() {
   unsubAdmin.push(onSnapshot(query(collection(db, 'orders'), orderBy('createdAt', 'desc'), limit(600)), qs => {
     S.admin.orders = qs.docs.map(d => ({ id: d.id, ...d.data() }));
     if (!first) qs.docChanges().forEach(c => { if (c.type === 'added' && c.doc.data().status === 'en_espera') toast(`Nuevo pedido: ${c.doc.data().pname} · ${c.doc.data().nickname}`, 'info', 6000); });
-    first = false; S.admin.ready = true; titleBadge(); renderAll();
+    first = false; S.admin.ready = true; titleBadge(); renderAll(); refreshUD();
   }, e => console.warn('orders', e)));
   let firstR = true;
   unsubAdmin.push(onSnapshot(query(collection(db, 'recharges'), orderBy('createdAt', 'desc'), limit(400)), qs => {
     S.admin.recharges = qs.docs.map(d => ({ id: d.id, ...d.data() }));
     if (!firstR) qs.docChanges().forEach(c => { if (c.type === 'added' && c.doc.data().status === 'pendiente') toast(`Recarga por verificar: ${money(c.doc.data().amountCents)} · ${c.doc.data().nickname}`, 'info', 6000); });
-    firstR = false; titleBadge(); renderAll();
+    firstR = false; titleBadge(); renderAll(); refreshUD();
   }, e => console.warn('recharges', e)));
-  unsubAdmin.push(onSnapshot(collection(db, 'users'), qs => { S.admin.users = qs.docs.map(d => ({ id: d.id, ...d.data() })); renderAll(); }, e => console.warn('users', e)));
+  unsubAdmin.push(onSnapshot(collection(db, 'users'), qs => { S.admin.users = qs.docs.map(d => ({ id: d.id, ...d.data() })); renderAll(); refreshUD(); }, e => console.warn('users', e)));
   unsubAdmin.push(onSnapshot(collection(db, 'admins'), qs => { S.admin.team = qs.docs.map(d => ({ id: d.id, ...d.data() })); renderAll(); }, e => console.warn('admins', e)));
 }
 function stopAdmin() { unsubAdmin.splice(0).forEach(f => f()); S.admin = { on: false, orders: [], recharges: [], users: [], team: [], ready: false }; titleBadge(); }
@@ -1582,7 +1650,12 @@ function aSummary() {
   const lowStock = S.products.filter(p => p.status === 'disponible' && (p.stock || 0) <= 3);
   const appr = S.admin.recharges.filter(r => r.status === 'aprobada').reduce((a, r) => a + (r.creditedCents ?? r.amountCents), 0);
   let i = 0;
-  return `<div class="stats">
+  const rate = RATE();
+  return `<div class="card pad rate-card" data-i="${i++}">
+    <div><h3 class="h3" style="margin:0">Tasa del dólar</h3><p class="small muted">${rate ? `Actual: <b style="color:var(--txt)">Bs ${fmtRate(rate)}</b> por 1 USD${S.settings.bsRateAt ? ` · actualizada ${fdate(S.settings.bsRateAt)}` : ''}` : 'Sin tasa: los clientes solo verán montos en dólares.'}</p></div>
+    <form data-form="rate" class="row gap"><input class="inp inp-sm mono" name="rate" inputmode="decimal" placeholder="Ej: 40,50" style="width:130px" aria-label="Nueva tasa"><button class="btn btn-pri btn-sm" type="submit">Actualizar tasa</button></form>
+  </div>
+  <div class="stats">
     <div class="card stat" data-i="${i++}"><span>Ventas hoy</span><b>${mAnim('a-today', today)}</b><small>${todayL.length} pedidos</small></div>
     <div class="card stat" data-i="${i++}"><span>Ventas totales</span><b>${mAnim('a-sales', sales)}</b><small>${valid.length} pedidos pagados</small></div>
     <div class="card stat" data-i="${i++}"><span>Pedidos en espera</span><b class="${pendingOrders() ? 'warn-t' : ''}">${pendingOrders()}</b><small>${O.filter(o => o.status === 'procesado').length} procesados sin completar</small></div>
@@ -1616,7 +1689,7 @@ function aOrdersList() {
     const payHTML = dir ? `<div class="paybox ${o.payStatus}">
         <div class="row between gap wrapf"><span class="small" style="font-weight:700">Pago directo · ${esc(o.payMethod)}</span><span class="pill ${PAYST[o.payStatus]?.c}"><i></i>${PAYST[o.payStatus]?.l}</span></div>
         <dl class="kv" style="margin-top:8px"><dt>Referencia</dt><dd class="mono">${esc(o.payRef)}<button class="copy" data-act="copy" data-t="${esc(o.payRef)}" aria-label="Copiar">${icon('copy', 12)}</button></dd>
-          <dt>Monto total</dt><dd class="mono">${money(o.payTotalCents)}${bsOf(o.payTotalCents) ? ` · ${bsOf(o.payTotalCents)}` : ''}${grp.length > 1 ? ` <span class="dim">(${grp.length} pedidos en este pago)</span>` : ''}</dd></dl>
+          <dt>Monto total</dt><dd class="mono">${o.payCurrency === 'BS' && o.payRate ? `<b>${bsAt(o.payTotalCents, o.payRate)}</b> · ${money(o.payTotalCents)} <span class="dim">(tasa ${fmtRate(o.payRate)})</span>` : money(o.payTotalCents)}${grp.length > 1 ? ` <span class="dim">(${grp.length} pedidos en este pago)</span>` : ''}</dd></dl>
         <div class="row gap wrapf" style="margin-top:10px">
           ${o.hasProof ? `<button class="btn btn-xs btn-ghost" data-act="see-proof" data-g="${esc(o.payGroup)}">${icon('image', 14)} Ver capture</button>` : '<span class="tiny dim">Sin capture adjunto</span>'}
           ${o.payStatus === 'por_verificar' && !ref ? `<button class="btn btn-xs btn-pri" data-act="pay-ok" data-g="${esc(o.payGroup)}">${icon('check', 14)} Confirmar pago</button><button class="btn btn-xs btn-bad" data-act="pay-no" data-g="${esc(o.payGroup)}">Rechazar pago</button>` : ''}
@@ -1661,7 +1734,7 @@ function aRechList() {
     <td class="full"><div class="row gap">${avatar(userById(r.uid)?.avatar, 'sm')}<div><b style="font-weight:500">${esc(r.nickname)}</b><div class="tiny dim">${esc(r.email)}</div></div></div></td>
     <td>${esc(r.method)}${r.note ? `<div class="tiny dim">${esc(r.note)}</div>` : ''}</td>
     <td class="mono">${esc(r.reference)}<button class="copy" data-act="copy" data-t="${esc(r.reference)}" aria-label="Copiar">${icon('copy', 12)}</button></td>
-    <td class="mono">${money(r.amountCents)}${r.creditedCents != null && r.creditedCents !== r.amountCents ? `<div class="tiny ok-t">acreditado ${money(r.creditedCents)}</div>` : ''}</td>
+    <td class="mono">${money(r.amountCents)}${r.currency === 'BS' && r.rate ? `<div class="tiny dim">${bsAt(r.amountCents, r.rate)} · tasa ${fmtRate(r.rate)}</div>` : ''}${r.creditedCents != null && r.creditedCents !== r.amountCents ? `<div class="tiny ok-t">acreditado ${money(r.creditedCents)}</div>` : ''}</td>
     <td class="small dim">${fdate(r.createdAt)}</td>
     <td><span class="pill ${RST[r.status]?.c}"><i></i>${RST[r.status]?.l}</span>${r.adminNote ? `<div class="tiny dim">${esc(r.adminNote)}</div>` : ''}</td>
     <td class="full">${r.status === 'pendiente' ? `<div class="row gap"><button class="btn btn-xs btn-pri" data-act="rc-ok" data-id="${r.id}">${icon('check', 14)} Aprobar</button><button class="btn btn-xs btn-bad" data-act="rc-no" data-id="${r.id}">Rechazar</button></div>` : `<span class="tiny dim">${esc(r.reviewedBy || '')}</span>`}</td>
@@ -1725,14 +1798,68 @@ function aUsersList() {
   let list = [...S.admin.users].sort((a, b) => tsMs(b.createdAt) - tsMs(a.createdAt));
   if (q) list = list.filter(u => `${u.nickname} ${u.email}`.toLowerCase().includes(q));
   if (!list.length) return `<div class="card empty">${icon('users', 36)}<b>Sin usuarios</b></div>`;
-  return `<div class="card tbl-wrap" data-i="0"><table class="tbl resp"><thead><tr><th>Cliente</th><th>Saldo</th><th>Pedidos</th><th></th></tr></thead><tbody>
-  ${list.slice(0, 300).map(u => { const n = S.admin.orders.filter(o => o.uid === u.id).length; return `<tr>
+  return `<div class="card tbl-wrap" data-i="0"><table class="tbl resp"><thead><tr><th>Cliente</th><th>Saldo</th><th>Comprado</th><th>Pedidos</th><th></th></tr></thead><tbody>
+  ${list.slice(0, 300).map(u => { const st = userStats(u.id); return `<tr class="clickrow" data-act="u-open" data-id="${u.id}">
     <td class="full"><div class="row gap">${avatar(u.avatar, 'sm')}<div><b style="font-weight:500">${esc(u.nickname)}</b>${u.banned ? ' <span class="pill bad">Bloqueado</span>' : ''}<div class="tiny dim">${esc(u.email)} · desde ${fdate(u.createdAt)}</div></div></div></td>
-    <td class="mono">${money(u.balanceCents)}</td>
-    <td>${n}</td>
-    <td class="full"><div class="row gap wrapf" style="gap:6px"><button class="btn btn-xs btn-ghost" data-act="u-bal" data-id="${u.id}">${icon('coins', 14)} Saldo</button>
+    <td class="mono"><span class="tiny dim hide-d">Saldo </span>${money(u.balanceCents)}</td>
+    <td class="mono"><span class="tiny dim hide-d">Comprado </span>${money(st.spent)}</td>
+    <td><span class="tiny dim hide-d">Pedidos </span>${st.orders}</td>
+    <td class="full"><div class="row gap wrapf" style="gap:6px"><button class="btn btn-xs btn-pri" data-act="u-open" data-id="${u.id}">Ver historial</button><button class="btn btn-xs btn-ghost" data-act="u-bal" data-id="${u.id}">${icon('coins', 14)} Saldo</button>
       <button class="btn btn-xs ${u.banned ? 'btn-ok' : 'btn-bad'}" data-act="u-ban" data-id="${u.id}">${u.banned ? 'Desbloquear' : 'Bloquear'}</button></div></td>
   </tr>`; }).join('')}</tbody></table></div>`;
+}
+function userStats(uid) {
+  const O = S.admin.orders.filter(o => o.uid === uid);
+  return { orders: O.length, spent: O.filter(o => !FINAL(o.status) && paidOk(o)).reduce((a, o) => a + o.totalCents, 0),
+    recharged: S.admin.recharges.filter(r => r.uid === uid && r.status === 'aprobada').reduce((a, r) => a + (r.creditedCents ?? r.amountCents), 0) };
+}
+/* ---- ficha del cliente: saldo + historial de compras, recargas y movimientos ---- */
+async function openUserDetail(uid, tab = 'compras') {
+  openModal(`<div class="ud-root">${userDetailHTML(uid, { tab, moves: null })}</div>`, 'wide ud');
+  S.ud = { uid, tab, moves: null };
+  try {
+    const qs = await getDocs(query(collection(db, 'movements'), where('uid', '==', uid)));
+    if (S.ud?.uid !== uid) return;
+    S.ud.moves = qs.docs.map(d => ({ id: d.id, ...d.data() })); refreshUD();
+  } catch (e) { if (S.ud?.uid === uid) { S.ud.moves = []; refreshUD(); } }
+}
+function refreshUD() { const box = $('#modal .ud-root'); if (S.ud && box) box.innerHTML = userDetailHTML(S.ud.uid, S.ud); }
+function userDetailHTML(uid, ud) {
+  const u = userById(uid);
+  if (!u) return `<button class="mclose" data-act="close-modal" aria-label="Cerrar">${icon('x', 18)}</button><div class="empty"><b>Cliente no encontrado</b></div>`;
+  const byDate = (a, b) => tsMs(b.createdAt) - tsMs(a.createdAt);
+  const O = S.admin.orders.filter(o => o.uid === uid).sort(byDate), Rc = S.admin.recharges.filter(r => r.uid === uid).sort(byDate), st = userStats(uid);
+  const tab = ud.tab || 'compras';
+  const ledger = ud.moves === null ? null : [
+    ...ud.moves.map(m => ({ t: tsMs(m.createdAt), amt: m.amountCents, title: m.type === 'recarga' ? 'Recarga aprobada' : m.type === 'reembolso' ? 'Reembolso' : 'Ajuste de saldo', sub: [m.note, m.by ? 'por ' + m.by : ''].filter(Boolean).join(' · ') })),
+    ...O.filter(o => !isDirect(o)).map(o => ({ t: tsMs(o.createdAt), amt: -(o.totalCents + (o.refundedCents || 0)), title: `Compra con saldo · ${o.pname}`, sub: `Pedido #${shortId(o.id)}` }))
+  ].sort((a, b) => b.t - a.t);
+  let list = '';
+  if (tab === 'compras') list = O.length ? O.map(o => `<div class="ud-it">
+      <div class="grow"><b>${esc(o.pname)} <span class="dim" style="font-weight:400">× ${o.qty}</span></b>
+        <div class="tiny dim">#${shortId(o.id)} · ${fdate(o.createdAt)} · ${isDirect(o) ? `${esc(o.payMethod)} · ref <span class="mono">${esc(o.payRef)}</span>` : 'Pagó con saldo'}</div>
+        ${(o.refunds || []).length ? `<div class="tiny warn-t">Reembolsado ${money(o.refundedCents)}</div>` : ''}</div>
+      <div style="text-align:right"><b class="mono">${money(o.totalCents)}</b><div class="row gap" style="gap:4px;justify-content:flex-end;margin-top:4px">${isDirect(o) ? `<span class="pill ${PAYST[o.payStatus]?.c}"><i></i>${o.payStatus === 'verificado' ? 'Pagado' : o.payStatus === 'rechazado' ? 'Rechazado' : 'Por verificar'}</span>` : ''}<span class="pill ${OST[o.status]?.c}"><i></i>${OST[o.status]?.l}</span></div></div>
+    </div>`).join('') : '<p class="muted small" style="padding:16px 0">Sin compras todavía.</p>';
+  if (tab === 'recargas') list = Rc.length ? Rc.map(r => `<div class="ud-it">
+      <div class="grow"><b>${esc(r.method)}</b><div class="tiny dim">Ref <span class="mono">${esc(r.reference)}</span> · ${fdate(r.createdAt)}${r.adminNote ? ' · ' + esc(r.adminNote) : ''}</div></div>
+      <div style="text-align:right"><b class="mono">${money(r.creditedCents ?? r.amountCents)}</b>${r.currency === 'BS' && r.rate ? `<div class="tiny dim">${bsAt(r.amountCents, r.rate)}</div>` : ''}<div style="margin-top:4px"><span class="pill ${RST[r.status]?.c}"><i></i>${RST[r.status]?.l}</span></div></div>
+    </div>`).join('') : '<p class="muted small" style="padding:16px 0">Sin recargas todavía.</p>';
+  if (tab === 'saldo') list = ledger === null ? '<div class="empty" style="padding:24px"><span class="spin"></span></div>' : ledger.length ? ledger.map(m => `<div class="ud-it">
+      <div class="grow"><b>${esc(m.title)}</b><div class="tiny dim">${esc(m.sub)} · ${fdate(m.t)}</div></div>
+      <b class="mono ${m.amt >= 0 ? 'ok-t' : ''}">${m.amt >= 0 ? '+' : '−'}${money(Math.abs(m.amt))}</b>
+    </div>`).join('') : '<p class="muted small" style="padding:16px 0">Sin movimientos de saldo.</p>';
+  return `<button class="mclose" data-act="close-modal" aria-label="Cerrar">${icon('x', 18)}</button>
+    <div class="row gap" style="gap:14px;padding-right:40px">${avatar(u.avatar, 'lg')}<div class="grow"><h2 style="margin:0">${esc(u.nickname)}</h2><div class="small muted">${esc(u.email)}</div><div class="tiny dim">Cliente desde ${fdate(u.createdAt)}${u.banned ? ' · <span class="bad-t">Bloqueado</span>' : ''}</div></div></div>
+    <div class="ud-stats">
+      <div><span>Saldo actual</span><b class="mono">${money(u.balanceCents)}</b></div>
+      <div><span>Total comprado</span><b class="mono">${money(st.spent)}</b></div>
+      <div><span>Pedidos</span><b class="mono">${st.orders}</b></div>
+      <div><span>Recargado</span><b class="mono">${money(st.recharged)}</b></div>
+    </div>
+    <div class="row gap wrapf" style="gap:8px"><button class="btn btn-sm btn-ghost" data-act="u-bal" data-id="${u.id}">${icon('coins', 15)} Ajustar saldo</button><button class="btn btn-sm ${u.banned ? 'btn-ok' : 'btn-bad'}" data-act="u-ban" data-id="${u.id}">${u.banned ? 'Desbloquear' : 'Bloquear'}</button></div>
+    <div class="tabs" style="margin:18px 0 8px"><button class="${tab === 'compras' ? 'on' : ''}" data-act="ud-tab" data-t="compras">Compras · ${O.length}</button><button class="${tab === 'recargas' ? 'on' : ''}" data-act="ud-tab" data-t="recargas">Recargas · ${Rc.length}</button><button class="${tab === 'saldo' ? 'on' : ''}" data-act="ud-tab" data-t="saldo">Movimientos de saldo</button></div>
+    <div class="ud-list">${list}</div>`;
 }
 let setLogo = null;
 function aSettings() {
@@ -1753,14 +1880,46 @@ function aSettings() {
       <div class="field" style="margin-bottom:0"><label class="lb">Anuncio superior (opcional)</label><input class="inp" name="announcement" value="${esc(s.announcement)}" placeholder="Ej: Netflix a $3 solo este fin de semana"></div>
     </div>
     <div class="card pad" data-i="1">
-      <h3 class="h3" style="margin-bottom:16px">Pagos y catálogo</h3>
-      <div class="field"><label class="lb">Métodos de recarga</label><textarea class="ta mono" name="payMethods" style="min-height:120px;font-size:13.5px">${esc((s.payMethods || []).map(m => `${m.name} | ${m.details}`).join('\n'))}</textarea><div class="hint">Uno por línea: <b>Nombre | datos para pagar</b></div></div>
-      <div class="field"><label class="lb">Tasa en bolívares (Bs por 1 USD)</label><input class="inp mono" name="bsRate" inputmode="decimal" value="${esc(s.bsRate || '')}" placeholder="Ej: 40.50"><div class="hint">Opcional. Si la pones, al pagar se muestra el monto en Bs para Pago Móvil. Vacío o 0 = solo dólares.</div></div>
+      <h3 class="h3" style="margin-bottom:16px">Tasa y catálogo</h3>
+      <div class="field"><label class="lb">Tasa del dólar (Bs por 1 USD)</label><input class="inp mono" name="bsRate" inputmode="decimal" value="${esc(s.bsRate ? fmtRate(s.bsRate) : '')}" placeholder="Ej: 40,50"><div class="hint">Con ella el cliente ve cuánto pagar en bolívares (Pago Móvil, transferencia). Vacío = solo dólares. También la cambias rápido en Resumen.</div></div>
       <div class="field"><label class="lb">Recarga mínima (USD)</label><input class="inp mono" name="minRechargeUsd" inputmode="decimal" value="${esc(s.minRechargeUsd)}"></div>
       <div class="field"><label class="lb">Categorías (en orden)</label><input class="inp" name="categories" value="${esc((s.categories || []).join(', '))}"><div class="hint">Separadas por coma.</div></div>
       <button class="btn btn-pri btn-block" type="submit">Guardar ajustes</button>
     </div>
-  </form>`;
+  </form>
+  ${pmEditorHTML()}`;
+}
+/* ---- editor de métodos de pago (cada método con sus datos) ---- */
+function pmEditorHTML() {
+  if (!S.pmEdit) S.pmEdit = allPMs().map(m => JSON.parse(JSON.stringify(m)));
+  return `<div class="card pad" data-i="2" style="margin-top:18px">
+    <div class="row between wrapf gap" style="align-items:flex-start">
+      <div><h3 class="h3">Métodos de pago</h3><p class="muted small">Tus datos para que el cliente sepa a dónde pagar. Se muestran al pagar un pedido y al recargar saldo, cada dato con su botón copiar.</p></div>
+      <div class="row gap"><select class="sel sel-sm" id="pm-add-type" aria-label="Tipo de método">${Object.entries(PM_TYPES).map(([k, v]) => `<option value="${k}">${v.l}</option>`).join('')}</select><button class="btn btn-sm btn-ghost" data-act="pm-add">${icon('plus', 15)} Agregar</button></div>
+    </div>
+    <div class="pm-list">${S.pmEdit.map((m, i) => `<div class="pm-ed ${m.active ? '' : 'off'}">
+      <div class="row between wrapf gap">
+        <div class="row gap wrapf"><span class="pill blue">${PM_TYPES[m.type].l}</span><input class="inp inp-sm" data-pm="${i}" data-k="name" value="${esc(m.name)}" placeholder="Nombre que ve el cliente" style="width:210px" aria-label="Nombre"></div>
+        <div class="row gap wrapf">
+          <select class="sel sel-sm" data-pm="${i}" data-k="currency" aria-label="Moneda"><option value="BS" ${m.currency === 'BS' ? 'selected' : ''}>Cobra en Bs</option><option value="USD" ${m.currency === 'USD' ? 'selected' : ''}>Cobra en USD</option></select>
+          <label class="row gap small" style="gap:6px"><input type="checkbox" data-pm="${i}" data-k="active" ${m.active ? 'checked' : ''}> Visible</label>
+          ${i ? `<button class="icon-btn" style="width:32px;height:32px" data-act="pm-up" data-i="${i}" aria-label="Subir" title="Subir">${icon('up', 15)}</button>` : ''}
+          <button class="icon-btn" style="width:32px;height:32px" data-act="pm-del" data-i="${i}" aria-label="Eliminar" title="Eliminar">${icon('trash', 15)}</button>
+        </div>
+      </div>
+      <div class="pm-fields">
+        ${PM_TYPES[m.type].f.map(([k, l]) => `<div><label class="lb">${l}</label><input class="inp inp-sm${['telefono', 'cedula', 'payid', 'cuenta', 'wallet'].includes(k) ? ' mono' : ''}" data-pm="${i}" data-k="data.${k}" value="${esc(m.data[k] || '')}"></div>`).join('')}
+        <div class="full"><label class="lb">Nota para el cliente (opcional)</label><input class="inp inp-sm" data-pm="${i}" data-k="note" value="${esc(m.note)}" placeholder="Ej: solo desde Banesco · enviar capture por WhatsApp"></div>
+      </div>
+    </div>`).join('') || '<p class="muted small" style="margin-top:12px">No tienes métodos de pago. Agrega uno arriba.</p>'}</div>
+    <div class="row gap" style="justify-content:flex-end;margin-top:16px"><button class="btn btn-quiet btn-sm" data-act="pm-reset">Descartar cambios</button><button class="btn btn-pri btn-sm" data-act="pm-save">${icon('check', 15)} Guardar métodos de pago</button></div>
+  </div>`;
+}
+function pmSet(t) {
+  const m = S.pmEdit?.[+t.dataset.pm]; if (!m) return;
+  const k = t.dataset.k, v = t.type === 'checkbox' ? t.checked : t.value;
+  if (k.startsWith('data.')) m.data[k.slice(5)] = v; else m[k] = v;
+  if (k === 'active') t.closest('.pm-ed')?.classList.toggle('off', !v);
 }
 
 /* ---------- formulario de producto (con subida de imagen) ---------- */
@@ -1851,7 +2010,7 @@ window.addEventListener('hashchange', () => {
 let closing = false, modalSeq = 0, modalOnClose = null;
 function openModal(html, cls = '', onClose = null) {
   const prevCb = modalOnClose; modalOnClose = null; prevCb?.();
-  shared?.els?.forEach(e => e.style.visibility = ''); shared = null; closing = false; modalSeq++;
+  shared?.els?.forEach(e => e.style.visibility = ''); shared = null; closing = false; modalSeq++; S.ud = null;
   modalOnClose = onClose;
   const m = $('#modal'); m.classList.remove('closing');
   m.innerHTML = `<div class="mback"><div class="mbox ${cls}" role="dialog" aria-modal="true">${html}</div></div>`;
@@ -1878,7 +2037,7 @@ async function closeModal(instant, opts) {
   }
   if (seq !== modalSeq) return;
   shared?.els?.forEach(e => e.style.visibility = '');
-  shared = null; m.classList.remove('open', 'closing', 'plain'); m.innerHTML = ''; document.body.style.overflow = ''; closing = false;
+  shared = null; S.ud = null; m.classList.remove('open', 'closing', 'plain'); m.innerHTML = ''; document.body.style.overflow = ''; closing = false;
 }
 function confirmBox(title, text, okLabel = 'Confirmar', extra = '') {
   return new Promise(res => {
@@ -1926,7 +2085,7 @@ const ACT = {
   'av-e': el => { const a = parseAv(draftAv ?? S.profile.avatar); draftAv = el.dataset.v + '|' + a.c; refreshAvatarPicker(); },
   'av-c': el => { const a = parseAv(draftAv ?? S.profile.avatar); draftAv = a.e + '|' + el.dataset.v; refreshAvatarPicker(); },
   // admin
-  'atab': el => { S.atab = el.dataset.t; S.aq = ''; setLogo = null; clearDirty(); renderView(true); },
+  'atab': el => { S.atab = el.dataset.t; S.aq = ''; setLogo = null; S.pmEdit = null; clearDirty(); renderView(true); },
   'aof': el => { S.aOrderF = el.dataset.f; renderView(true); },
   'arf': el => { S.aRechF = el.dataset.f; renderView(true); },
   'pf-noimg': () => { pfImage = ''; const f = $('#modal form[data-form="product"]'); if (f) f.imageUrl.value = ''; updatePfPreview(); },
@@ -1939,6 +2098,17 @@ const ACT = {
     if (el.dataset.done) { if (!info && !(await confirmBox('¿Completar sin datos?', 'El cliente no verá datos de entrega.', 'Completar'))) return; upd.status = 'completado'; }
     try { await updateDoc(doc(db, 'orders', id), upd); DIRTY.delete('#di-' + id); toast(el.dataset.done ? 'Pedido completado' : 'Entrega guardada'); } catch (e) { toast(errMsg(e), 'bad'); }
   }),
+  'pm-add': () => { const t = $('#pm-add-type').value; S.pmEdit.push({ id: 'pm' + Date.now().toString(36), type: t, name: PM_TYPES[t].l, currency: PM_TYPES[t].cur, data: {}, note: '', active: true }); renderView(true); },
+  'pm-del': async el => { const i = +el.dataset.i, m = S.pmEdit[i]; if (!(await confirmBox('Eliminar método', `¿Quitar <b>${esc(m.name)}</b>? Se aplica al guardar.`, 'Quitar'))) return; S.pmEdit.splice(i, 1); renderView(true); },
+  'pm-up': el => { const i = +el.dataset.i; [S.pmEdit[i - 1], S.pmEdit[i]] = [S.pmEdit[i], S.pmEdit[i - 1]]; renderView(true); },
+  'pm-reset': () => { S.pmEdit = null; renderView(true); toast('Cambios descartados', 'info'); },
+  'pm-save': el => busy(el, async () => {
+    const list = S.pmEdit.map(m => { const n = normPM(m); n.name = n.name.trim().slice(0, 40) || PM_TYPES[n.type].l; Object.keys(n.data).forEach(k => n.data[k] = String(n.data[k]).trim().slice(0, 120)); return { ...n, details: pmText(n) }; });
+    if (!list.some(m => m.active)) return toast('Deja al menos un método visible', 'bad');
+    try { await setDoc(doc(db, 'settings', 'store'), { payMethods: list }, { merge: true }); S.pmEdit = null; toast('Métodos de pago guardados'); } catch (e) { toast(errMsg(e), 'bad'); }
+  }),
+  'u-open': el => openUserDetail(el.dataset.id),
+  'ud-tab': el => { if (!S.ud) return; S.ud.tab = el.dataset.t; refreshUD(); },
   'pay-mode': el => { S.pay.mode = el.dataset.m; renderDrawer(true); },
   'pay-m': el => { S.pay.m = +el.dataset.k; renderDrawer(true); },
   'checkout-direct': el => checkoutDirect(el),
@@ -1953,7 +2123,7 @@ const ACT = {
     const g = el.dataset.g, grp = S.admin.orders.filter(o => o.payGroup === g && o.payStatus === 'por_verificar' && !FINAL(o.status));
     if (!grp.length) return;
     const o = grp[0];
-    if (!(await confirmBox('Confirmar pago', `¿Recibiste <b>${money(o.payTotalCents)}</b>${bsOf(o.payTotalCents) ? ` (${bsOf(o.payTotalCents)})` : ''} por <b>${esc(o.payMethod)}</b> con referencia <b class="mono">${esc(o.payRef)}</b>?<br>Se marcarán como pagados ${grp.length} pedido(s).`, 'Sí, pago recibido'))) return;
+    if (!(await confirmBox('Confirmar pago', `¿Recibiste <b>${o.payCurrency === 'BS' && o.payRate ? bsAt(o.payTotalCents, o.payRate) + ' (' + money(o.payTotalCents) + ')' : money(o.payTotalCents)}</b> por <b>${esc(o.payMethod)}</b> con referencia <b class="mono">${esc(o.payRef)}</b>?<br>Se marcarán como pagados ${grp.length} pedido(s).`, 'Sí, pago recibido'))) return;
     try { const b = writeBatch(db); grp.forEach(x => b.update(doc(db, 'orders', x.id), { payStatus: 'verificado', payCheckedBy: S.profile.nickname, updatedAt: serverTimestamp() })); await b.commit(); toast('Pago verificado. Ya puedes procesar el pedido'); }
     catch (e) { toast(errMsg(e), 'bad'); }
   },
@@ -2009,12 +2179,18 @@ const ACT = {
   },
   'u-bal': async el => {
     const u = userById(el.dataset.id); if (!u) return;
+    const back = S.ud ? { uid: S.ud.uid, tab: S.ud.tab } : null;
     const r = await confirmBox(`Saldo de ${esc(u.nickname)}`, `Saldo actual: <b class="mono">${money(u.balanceCents)}</b>. Usa un número negativo para descontar.`, 'Aplicar',
       `<div class="field"><label class="lb">Monto (USD)</label><input class="inp mono" name="amount" placeholder="5.00 ó -5.00"></div><div class="field"><label class="lb">Motivo</label><input class="inp" name="note" placeholder="Ej: bono por referido"></div>`);
-    if (!r) return; const c = toCents(r.amount); if (!c) return toast('Monto inválido', 'bad');
+    if (!r) { if (back) openUserDetail(back.uid, back.tab); return; }
+    const c = toCents(r.amount); if (!c) { if (back) openUserDetail(back.uid, back.tab); return toast('Monto inválido', 'bad'); }
     try { await adjustBalance(u.id, c, r.note); toast('Saldo actualizado'); } catch (e) { toast(errMsg(e), 'bad'); }
+    if (back) openUserDetail(back.uid, back.tab);
   },
-  'u-ban': async el => { const u = userById(el.dataset.id); try { await updateDoc(doc(db, 'users', u.id), { banned: !u.banned }); toast(u.banned ? 'Usuario desbloqueado' : 'Usuario bloqueado: ya no podrá comprar', 'info'); } catch (e) { toast(errMsg(e), 'bad'); } }
+  'u-ban': async el => {
+    const u = userById(el.dataset.id); if (!u) return;
+    if (!u.banned) { const back = S.ud ? { uid: S.ud.uid, tab: S.ud.tab } : null; const ok = await confirmBox('Bloquear cliente', `${esc(u.nickname)} ya no podrá comprar.`, 'Bloquear'); if (back) openUserDetail(back.uid, back.tab); if (!ok) return; }
+    try { await updateDoc(doc(db, 'users', u.id), { banned: !u.banned }); toast(u.banned ? 'Usuario desbloqueado' : 'Usuario bloqueado: ya no podrá comprar', 'info'); } catch (e) { toast(errMsg(e), 'bad'); } }
 };
 document.addEventListener('click', e => {
   if (e.target.classList?.contains('mback')) return closeModal();
@@ -2031,13 +2207,17 @@ document.addEventListener('input', e => {
   const t = e.target; markDirty(t);
   if (t.id === 'q') { S.q = t.value; setGrid(); return; }
   if (t.dataset.pay) { S.pay[t.dataset.pay] = t.value; return; }
+  if (t.id === 'rc-amount') updateRcInfo();
+  if (t.dataset.pm != null) { pmSet(t); return; }
   if (t.dataset.cf != null) { const it = S.cart[+t.dataset.cf]; if (it) { (it.delivery ||= {})[t.dataset.fk] = t.value; saveCart(); } return; }
   if (t.hasAttribute('data-asearch')) { S.aq = t.value; const fn = { pedidos: aOrdersList, recargas: aRechList, usuarios: aUsersList }[S.atab]; if (fn) $('#alist').innerHTML = fn(); return; }
   if (t.form?.dataset.form === 'product') { if (t.name === 'imageUrl') pfImage = t.value.trim(); updatePfPreview(); }
 });
 document.addEventListener('change', async e => {
-  const t = e.target; if (t.type === 'checkbox' || t.tagName === 'SELECT') markDirty(t);
-  if (t.id === 'rc-method') { $('#rc-details').textContent = S.settings.payMethods?.[+t.value]?.details || ''; return; }
+  const t = e.target;
+  if (t.dataset.pm != null) { pmSet(t); return; }
+  if (t.type === 'checkbox' || t.tagName === 'SELECT') markDirty(t);
+  if (t.id === 'rc-method') { updateRcInfo(); return; }
   if (t.dataset.upload) {
     const file = t.files?.[0]; t.value = ''; if (!file) return;
     try {
@@ -2057,6 +2237,11 @@ document.addEventListener('change', async e => {
   } catch (err) { toast(errMsg(err), 'bad'); }
   t.blur();
 });
+function updateRcInfo() {
+  const box = $('#rc-info'); if (!box) return;
+  const m = activePMs()[+($('#rc-method')?.value || 0)], c = toCents($('#rc-amount')?.value);
+  box.innerHTML = payInfoHTML(m, c > 0 ? c : 0);
+}
 function refreshAvatarPicker() {
   const a = parseAv(draftAv);
   $$('[data-act="av-e"]').forEach(b => b.classList.toggle('on', b.dataset.v === a.e));
@@ -2066,7 +2251,20 @@ function refreshAvatarPicker() {
 }
 
 /* ---------------- formularios ---------------- */
+// acepta "40,50", "40.50", "1.234,56" o "1,234.56"
+const parseRate = v => {
+  let t = String(v || '').trim().replace(/\s/g, '');
+  if (/,\d{1,4}$/.test(t)) t = t.replace(/\./g, '').replace(',', '.'); else t = t.replace(/,/g, '');
+  const n = parseFloat(t); return Number.isFinite(n) && n > 0 ? Math.round(n * 10000) / 10000 : 0;
+};
 const FORMS = {
+  async rate(f) {
+    const v = parseRate(f.rate.value); if (!v) return toast('Escribe una tasa válida, ej: 40,50', 'bad');
+    await busy(f.querySelector('[type=submit]'), async () => {
+      try { await setDoc(doc(db, 'settings', 'store'), { bsRate: v, bsRateAt: serverTimestamp() }, { merge: true }); f.reset(); toast(`Tasa actualizada: Bs ${fmtRate(v)}`); }
+      catch (e) { toast(errMsg(e), 'bad'); }
+    });
+  },
   async 'admin-login'(f) {
     authErr('');
     const user = f.user.value.trim().toLowerCase();
@@ -2181,7 +2379,8 @@ const FORMS = {
     });
   },
   async recharge(f) {
-    const pm = S.settings.payMethods?.[+f.method.value];
+    const pm = activePMs()[+f.method.value];
+    if (!pm) return toast('No hay métodos de pago disponibles', 'bad');
     const cents = toCents(f.amount.value), min = Math.round((+S.settings.minRechargeUsd || 0) * 100);
     if (!(cents > 0)) return toast('Escribe un monto válido', 'bad');
     if (cents < min) return toast(`La recarga mínima es ${money(min)}`, 'bad');
@@ -2189,8 +2388,8 @@ const FORMS = {
     const reference = f.reference.value.trim(); if (reference.length < 3) return toast('Escribe la referencia del pago', 'bad');
     await busy(f.querySelector('[type=submit]'), async () => {
       try {
-        await addDoc(collection(db, 'recharges'), { uid: S.user.uid, email: S.user.email, nickname: S.profile.nickname, amountCents: cents, method: pm?.name || 'Otro', reference: reference.slice(0, 60), note: f.note.value.trim().slice(0, 140), status: 'pendiente', createdAt: serverTimestamp() });
-        f.reset(); clearDirty('recharge|'); $('#rc-details').textContent = S.settings.payMethods?.[0]?.details || '';
+        await addDoc(collection(db, 'recharges'), { uid: S.user.uid, email: S.user.email, nickname: S.profile.nickname, amountCents: cents, method: pm.name.slice(0, 40), reference: reference.slice(0, 60), note: f.note.value.trim().slice(0, 140), status: 'pendiente', createdAt: serverTimestamp(), rate: RATE(), currency: pm.currency });
+        f.reset(); clearDirty('recharge|'); updateRcInfo();
         toast('Pago reportado. Te acreditaremos al verificarlo.');
       } catch (e) { toast(errMsg(e), 'bad'); }
     });
@@ -2218,11 +2417,11 @@ const FORMS = {
       storeName: f.storeName.value.trim() || DEFAULTS.storeName, tagline: f.tagline.value.trim(), logoUrl: setLogo || '',
       whatsapp: f.whatsapp.value.replace(/\D/g, '') || DEFAULTS.whatsapp, heroTitle: f.heroTitle.value.trim(), heroText: f.heroText.value.trim(),
       announcement: f.announcement.value.trim(), minRechargeUsd: +String(f.minRechargeUsd.value).replace(',', '.') || 0,
-      bsRate: Math.max(0, +String(f.bsRate.value).replace(',', '.') || 0),
-      payMethods: f.payMethods.value.split('\n').map(l => l.trim()).filter(Boolean).map(l => { const [n, ...r] = l.split('|'); return { name: n.trim(), details: r.join('|').trim() }; }),
+      bsRate: parseRate(f.bsRate.value),
       categories: f.categories.value.split(',').map(s => s.trim()).filter(Boolean)
     };
     await busy(f.querySelector('[type=submit]'), async () => {
+      if (data.bsRate !== RATE()) data.bsRateAt = serverTimestamp();
       try { await setDoc(doc(db, 'settings', 'store'), data, { merge: true }); setLogo = null; clearDirty('settings|'); toast('Ajustes guardados'); } catch (e) { toast(errMsg(e), 'bad'); }
     });
   }
