@@ -1,10 +1,10 @@
 <!doctype html>
-<html lang="es" data-mode="tienda">
+<html lang="es" data-mode="admin">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>NRDIGITAL · Tienda digital</title>
-<meta name="description" content="Cuentas de streaming, recargas de juegos y gift cards con entrega rápida. Paga con tu saldo.">
+<title>NRDIGITAL · Panel</title>
+<meta name="robots" content="noindex, nofollow">
 <meta name="theme-color" content="#09090b">
 <script>(function(){var d=document.documentElement;if(d.dataset.mode==='admin')return;d.classList.add('theme-wa');var m=document.querySelector('meta[name=theme-color]');if(m)m.content='#0e0d20';})();</script>
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 36 36'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236a00ff'/%3E%3Cstop offset='1' stop-color='%237686ff'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='36' height='36' rx='11' fill='url(%23g)'/%3E%3Cpath d='M11 26V11l12 15V11' fill='none' stroke='%23fff' stroke-width='3.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3Crect x='25.5' y='7' width='4' height='4' rx='1.2' fill='%23fff' opacity='.85'/%3E%3C/svg%3E">
@@ -454,6 +454,9 @@ html.theme-wa .foot h4{font-weight:800}
 .bnav a.bump svg{animation:popin .45s cubic-bezier(.3,1.6,.5,1)}
 
 .paysel{margin-bottom:12px}
+.oc-help{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
+.oc-help svg{color:#25d366}
+@media (max-width:520px){.oc-help .btn{width:100%}}
 /* paquetes de recarga */
 .price .from{font-size:.6em;font-weight:600;color:var(--mute);margin-right:3px;font-family:var(--sans);letter-spacing:0}
 .packs{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:8px;margin:0 0 18px}
@@ -642,8 +645,8 @@ const FIREBASE_CONFIG = {
   appId: "1:172668471762:web:59d09810de7116dc05a00b"
 };
 
-/* Este archivo es la TIENDA. El panel de administración es admin.html (mismo código, MODE = 'admin'). */
-const MODE = 'tienda';
+/* Este archivo es el PANEL DE ADMINISTRACIÓN. La tienda es index.html (mismo código, MODE = 'tienda'). */
+const MODE = 'admin';
 
 /* Valores por defecto (todo esto se puede cambiar luego en Panel → Ajustes) */
 const DEFAULTS = {
@@ -1628,6 +1631,16 @@ function stepsHTML(st, o = {}) {
   const order = ['en_espera', 'procesado', 'completado'], i = order.indexOf(st);
   return `<div class="steps">${order.map((s, k) => `${k ? `<div class="st-l ${k <= i ? 'on' : ''}"></div>` : ''}<div class="st ${k <= i ? 'on' : ''}"><i>${k < i || st === 'completado' ? '✓' : k + 1}</i>${OST[s].l}</div>`).join('')}</div>`;
 }
+// mensaje listo para WhatsApp con los datos del pedido
+const helpMsg = o => [
+  `Hola, necesito ayuda con mi pedido #${shortId(o.id)}`,
+  `Producto: ${o.pname}${o.qty > 1 ? ' × ' + o.qty : ''}`,
+  `Total: ${money(o.totalCents)}`,
+  `Estado: ${OST[o.status]?.l || o.status}`,
+  ...(isDirect(o) ? [`Pago: ${o.payMethod}${o.payRef ? ' · ref ' + o.payRef : ' · con capture'}`] : []),
+  ...Object.entries(o.delivery || {}).map(([k, v]) => `${k}: ${v}`),
+  `Usuario: ${S.profile?.nickname || o.nickname || ''}`
+].join('\n');
 function vOrders() {
   if (!S.user) return needLogin('Mis pedidos', 'Inicia sesión para ver el estado de tus compras.');
   const list = [...S.myOrders].sort((a, b) => tsMs(b.createdAt) - tsMs(a.createdAt));
@@ -1640,6 +1653,7 @@ function vOrders() {
     ${stepsHTML(o.status, o)}${refundsHTML(o)}
     ${o.deliveredInfo ? `<div class="deliver"><div class="row between"><span class="small" style="font-weight:500">Datos de tu pedido</span><button class="copy" data-act="copy" data-t="${esc(o.deliveredInfo)}">${icon('copy', 13)} Copiar</button></div><pre>${esc(o.deliveredInfo)}</pre></div>` : ''}
     ${o.adminNote ? `<p class="small muted" style="margin-top:10px">Nota: ${esc(o.adminNote)}</p>` : ''}
+    ${['en_espera', 'procesado', 'completado'].includes(o.status) ? `<div class="oc-help"><a class="btn btn-sm btn-ghost" target="_blank" rel="noopener" href="${waLink(helpMsg(o))}">${icon('wa', 16)} Necesito ayuda con mi pedido</a></div>` : ''}
   </div>`).join('') : `<div class="card empty">${icon('box', 40)}<b>Aún no tienes pedidos</b>Cuando compres algo, aparecerá aquí con su estado.<div style="margin-top:18px"><a class="btn btn-pri" href="#/tienda">Ir a la tienda</a></div></div>`}`;
 }
 
@@ -1794,6 +1808,7 @@ function aOrdersList() {
         <div class="row gap wrapf" style="margin-top:16px">
           <select class="sel sel-sm" data-chg="ostatus" data-id="${o.id}" ${ref ? 'disabled' : ''}>${Object.entries(OST).filter(([k]) => !FINAL(k) || o.status === k).map(([k, v]) => `<option value="${k}" ${o.status === k ? 'selected' : ''}>${v.l}</option>`).join('')}</select>
           ${ref || unpaid ? '' : `<button class="btn btn-xs btn-bad" data-act="refund" data-id="${o.id}">${icon('undo', 14)} Reembolsar</button>`}
+          <button class="btn btn-xs btn-quiet" style="margin-left:auto" data-act="o-del" data-id="${o.id}" title="Borrar este pedido">${icon('trash', 14)} Borrar</button>
         </div>
         ${(o.refunds || []).map(x => `<div class="tiny dim" style="margin-top:8px">↩ ${money(x.cents)} · ${x.units} u. · ${x.to === 'saldo' ? 'al saldo' : 'por fuera'}${x.ref ? ' · ref ' + esc(x.ref) : ''} · ${esc(x.by || '')}</div>`).join('')}
       </div>
@@ -1825,7 +1840,7 @@ function aRechList() {
     <td class="mono">${money(r.amountCents)}${r.currency === 'BS' && r.rate ? `<div class="tiny dim">${bsAt(r.amountCents, r.rate)} · tasa ${fmtRate(r.rate)}</div>` : ''}${r.creditedCents != null && r.creditedCents !== r.amountCents ? `<div class="tiny ok-t">acreditado ${money(r.creditedCents)}</div>` : ''}</td>
     <td class="small dim">${fdate(r.createdAt)}</td>
     <td><span class="pill ${RST[r.status]?.c}"><i></i>${RST[r.status]?.l}</span>${r.adminNote ? `<div class="tiny dim">${esc(r.adminNote)}</div>` : ''}</td>
-    <td class="full">${r.status === 'pendiente' ? `<div class="row gap"><button class="btn btn-xs btn-pri" data-act="rc-ok" data-id="${r.id}">${icon('check', 14)} Aprobar</button><button class="btn btn-xs btn-bad" data-act="rc-no" data-id="${r.id}">Rechazar</button></div>` : `<span class="tiny dim">${esc(r.reviewedBy || '')}</span>`}</td>
+    <td class="full">${r.status === 'pendiente' ? `<div class="row gap"><button class="btn btn-xs btn-pri" data-act="rc-ok" data-id="${r.id}">${icon('check', 14)} Aprobar</button><button class="btn btn-xs btn-bad" data-act="rc-no" data-id="${r.id}">Rechazar</button><button class="icon-btn" style="width:30px;height:30px" data-act="rc-del" data-id="${r.id}" aria-label="Borrar recarga" title="Borrar recarga">${icon('trash', 14)}</button></div>` : `<div class="row gap" style="gap:6px"><span class="tiny dim">${esc(r.reviewedBy || '')}</span><button class="icon-btn" style="width:30px;height:30px" data-act="rc-del" data-id="${r.id}" aria-label="Borrar recarga" title="Borrar recarga">${icon('trash', 14)}</button></div>`}</td>
   </tr>`).join('')}</tbody></table></div>`;
 }
 function aProducts() {
@@ -1945,7 +1960,7 @@ function userDetailHTML(uid, ud) {
       <div><span>Pedidos</span><b class="mono">${st.orders}</b></div>
       <div><span>Recargado</span><b class="mono">${money(st.recharged)}</b></div>
     </div>
-    <div class="row gap wrapf" style="gap:8px"><button class="btn btn-sm btn-ghost" data-act="u-bal" data-id="${u.id}">${icon('coins', 15)} Ajustar saldo</button><button class="btn btn-sm ${u.banned ? 'btn-ok' : 'btn-bad'}" data-act="u-ban" data-id="${u.id}">${u.banned ? 'Desbloquear' : 'Bloquear'}</button></div>
+    <div class="row gap wrapf" style="gap:8px"><button class="btn btn-sm btn-ghost" data-act="u-bal" data-id="${u.id}">${icon('coins', 15)} Ajustar saldo</button><button class="btn btn-sm ${u.banned ? 'btn-ok' : 'btn-bad'}" data-act="u-ban" data-id="${u.id}">${u.banned ? 'Desbloquear' : 'Bloquear'}</button><button class="btn btn-sm btn-quiet" style="margin-left:auto" data-act="u-del" data-id="${u.id}">${icon('trash', 15)} Borrar cliente</button></div>
     <div class="tabs" style="margin:18px 0 8px"><button class="${tab === 'compras' ? 'on' : ''}" data-act="ud-tab" data-t="compras">Compras · ${O.length}</button><button class="${tab === 'recargas' ? 'on' : ''}" data-act="ud-tab" data-t="recargas">Recargas · ${Rc.length}</button><button class="${tab === 'saldo' ? 'on' : ''}" data-act="ud-tab" data-t="saldo">Movimientos de saldo</button></div>
     <div class="ud-list">${list}</div>`;
 }
@@ -2290,6 +2305,38 @@ const ACT = {
     if (!r) return;
     try { await updateDoc(doc(db, 'recharges', rc.id), { status: 'rechazada', adminNote: r.note || '', reviewedAt: serverTimestamp(), reviewedBy: S.profile.nickname }); toast('Recarga rechazada', 'info'); } catch (e) { toast(errMsg(e), 'bad'); }
   },
+  'o-del': async el => {
+    const o = S.admin.orders.find(x => x.id === el.dataset.id); if (!o) return;
+    const r = await confirmBox('Borrar pedido', `Se borrará el pedido <b>#${shortId(o.id)}</b> · ${esc(o.pname)} de <b>${esc(o.nickname)}</b>. No se puede deshacer.${!isDirect(o) && !FINAL(o.status) ? '<br><span class="warn-t">Lo pagó con saldo: borrarlo no le devuelve el dinero. Si debes devolverlo, usa Reembolsar primero.</span>' : ''}`, 'Borrar pedido', restockBox([o]));
+    if (!r) return;
+    try { await runOps(orderDelOps([o], r.restock)); toast('Pedido borrado', 'info'); } catch (e) { toast(errMsg(e), 'bad'); }
+  },
+  'rc-del': async el => {
+    const rc = S.admin.recharges.find(x => x.id === el.dataset.id); if (!rc) return;
+    const r = await confirmBox('Borrar recarga', `Se borrará la recarga de <b>${money(rc.amountCents)}</b> de <b>${esc(rc.nickname)}</b>. No se puede deshacer.${rc.status === 'aprobada' ? '<br><span class="warn-t">Ya fue aprobada: el saldo acreditado no se descuenta. Si debes quitarlo, usa Ajustar saldo en el cliente.</span>' : ''}`, 'Borrar recarga');
+    if (!r) return;
+    try { await runOps([['d', doc(db, 'recharges', rc.id)], ...(rc.hasProof ? [['d', doc(db, 'proofs', rc.id)]] : [])]); toast('Recarga borrada', 'info'); } catch (e) { toast(errMsg(e), 'bad'); }
+  },
+  'u-del': async el => {
+    const u = userById(el.dataset.id); if (!u) return;
+    const O = S.admin.orders.filter(o => o.uid === u.id), Rc = S.admin.recharges.filter(x => x.uid === u.id);
+    const back = S.ud ? { uid: S.ud.uid, tab: S.ud.tab } : null;
+    const r = await confirmBox('Borrar cliente', `Se borrará <b>${esc(u.nickname)}</b> con <b>${O.length}</b> pedido(s), <b>${Rc.length}</b> recarga(s) y su historial de saldo. No se puede deshacer.`, 'Borrar todo',
+      `${restockBox(O)}<div class="field"><label class="lb">Escribe <b>${esc(u.nickname)}</b> para confirmar</label><input class="inp" name="conf" autocomplete="off"></div><div class="hint" style="margin:-6px 0 14px">Su acceso (correo y contraseña) queda en Firebase → Authentication; bórralo allí si quieres que no pueda volver a entrar.</div>`);
+    if (!r) { if (back) openUserDetail(back.uid, back.tab); return; }
+    if ((r.conf || '').trim().toLowerCase() !== u.nickname.toLowerCase()) { toast('El nombre no coincide. No se borró nada.', 'bad'); if (back) openUserDetail(back.uid, back.tab); return; }
+    try {
+      const mv = await getDocs(query(collection(db, 'movements'), where('uid', '==', u.id)));
+      await runOps([
+        ...orderDelOps(O, r.restock),
+        ...Rc.flatMap(x => [['d', doc(db, 'recharges', x.id)], ...(x.hasProof ? [['d', doc(db, 'proofs', x.id)]] : [])]),
+        ...mv.docs.map(d => ['d', d.ref]),
+        ['d', doc(db, 'nicknames', String(u.nickname).toLowerCase())],
+        ['d', doc(db, 'users', u.id)]
+      ]);
+      toast(`${u.nickname} y su historial fueron borrados`, 'info');
+    } catch (e) { toast(errMsg(e), 'bad'); }
+  },
   'p-new': () => productForm(),
   'p-edit': el => productForm(prod(el.dataset.id)),
   'p-del': async el => { const p = prod(el.dataset.id); if (!(await confirmBox('Eliminar producto', `¿Eliminar <b>${esc(p.name)}</b>? Los pedidos ya hechos se conservan.`, 'Eliminar'))) return; try { await deleteDoc(doc(db, 'products', p.id)); toast('Producto eliminado', 'info'); } catch (e) { toast(errMsg(e), 'bad'); } },
@@ -2589,6 +2636,28 @@ document.addEventListener('submit', e => { const f = e.target, h = FORMS[f.datas
 async function showProofIn(id) {
   try { const sn = await getDoc(doc(db, 'proofs', id)); const b = $('#cf-proof'); if (b && sn.exists()) b.innerHTML = `<a href="${esc(sn.data().img)}" target="_blank" rel="noopener"><img src="${esc(sn.data().img)}" alt="Capture del pago"></a>`; } catch { }
 }
+// borrados de registros (pruebas, errores). Se hacen en lotes.
+async function runOps(ops) {
+  for (let i = 0; i < ops.length; i += 400) {
+    const b = writeBatch(db);
+    ops.slice(i, i + 400).forEach(([t, r, d]) => t === 'd' ? b.delete(r) : b.update(r, d));
+    await b.commit();
+  }
+}
+function orderDelOps(list, restock) {
+  const ops = [], ids = new Set(list.map(o => o.id)), groups = new Set(), inc = {};
+  list.forEach(o => {
+    ops.push(['d', doc(db, 'orders', o.id)]);
+    if (o.payGroup) groups.add(o.payGroup);
+    if (restock && !FINAL(o.status) && !o.packId) inc[o.pid] = (inc[o.pid] || 0) + o.qty;
+  });
+  // el capture se borra si ya no queda ningún pedido de ese pago
+  groups.forEach(g => { if (!S.admin.orders.some(x => x.payGroup === g && !ids.has(x.id))) ops.push(['d', doc(db, 'proofs', g)]); });
+  Object.entries(inc).forEach(([pid, n]) => { if (prod(pid)) ops.push(['u', doc(db, 'products', pid), { stock: increment(n) }]); });
+  return ops;
+}
+const restockBox = list => list.some(o => !FINAL(o.status) && !o.packId && prod(o.pid))
+  ? `<label class="row gap small" style="margin-bottom:4px"><input type="checkbox" name="restock" checked> Devolver las unidades al stock</label><div class="hint" style="margin:0 0 14px">Desmárcalo si no tienes esas unidades.</div>` : '';
 async function approveRecharge(id, cents) {
   await runTransaction(db, async tx => {
     const rref = doc(db, 'recharges', id), rs = await tx.get(rref);
