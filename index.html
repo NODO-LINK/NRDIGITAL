@@ -454,6 +454,48 @@ html.theme-wa .foot h4{font-weight:800}
 .bnav a.bump svg{animation:popin .45s cubic-bezier(.3,1.6,.5,1)}
 
 .paysel{margin-bottom:12px}
+.oc-help{margin-top:14px;padding-top:14px;border-top:1px solid var(--line);display:flex;justify-content:flex-end}
+.oc-help svg{color:#25d366}
+@media (max-width:520px){.oc-help .btn{width:100%}}
+/* paquetes de recarga */
+.price .from{font-size:.6em;font-weight:600;color:var(--mute);margin-right:3px;font-family:var(--sans);letter-spacing:0}
+.packs{display:grid;grid-template-columns:repeat(auto-fill,minmax(138px,1fr));gap:8px;margin:0 0 18px}
+.pack{display:flex;flex-direction:column;align-items:flex-start;gap:1px;padding:11px 30px 11px 13px;border-radius:var(--r1);border:1.5px solid var(--line2);background:var(--s2);color:var(--txt);text-align:left;position:relative;transition:border-color .2s,background-color .2s,scale .2s var(--ease)}
+.pack b{font-weight:700;font-size:14px;line-height:1.25}
+.pack .pk-c{font-size:15.5px;font-weight:800;color:var(--soft-txt);font-family:var(--mono)}
+.pack small{font-size:11.5px;color:var(--mute)}
+.pack:hover:not([disabled]){border-color:var(--line3)}
+.pack:active:not([disabled]){scale:.97}
+.pack[disabled]{opacity:.55;cursor:not-allowed}
+.pack::after{content:'';position:absolute;top:12px;right:11px;width:12px;height:12px;border-radius:50%;border:1.5px solid var(--line3);transition:background-color .2s,border-color .2s,box-shadow .2s}
+.pack.on{border-color:var(--focus);background:var(--soft)}
+.pack.on::after{border-color:var(--focus);background:var(--focus);box-shadow:inset 0 0 0 2.5px var(--soft)}
+.ci-pk{display:inline-block;margin-top:3px;padding:1px 8px;border-radius:999px;background:var(--soft);color:var(--soft-txt);font-size:12px;font-weight:700}
+.seg{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.seg label{display:flex;flex-direction:column;gap:2px;padding:11px 13px;border-radius:var(--r1);border:1.5px solid var(--line2);cursor:pointer;transition:border-color .2s,background-color .2s}
+.seg label:has(input:checked){border-color:var(--focus);background:var(--soft)}
+.seg input{position:absolute;opacity:0;pointer-events:none}
+.seg span{font-weight:600;font-size:14px}.seg small{font-size:12px;color:var(--mute);line-height:1.35}
+form.pk-mode .only-stock,form:not(.pk-mode) .only-packs{display:none}
+.pk-list{display:grid;gap:8px;margin-bottom:10px}
+.pk-row{display:grid;grid-template-columns:1fr 112px auto auto;gap:6px;align-items:center}
+.pk-row .icon-btn{width:34px;height:34px}
+.pk-pr{position:relative}.pk-pr span{position:absolute;left:11px;top:50%;translate:0 -50%;color:var(--mute);font-size:13px;pointer-events:none}.pk-pr input{padding-left:22px}
+/* subir capture */
+.proof{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;text-align:center;padding:18px 14px;border-radius:var(--r2);border:1.5px dashed var(--line3);background:var(--s2);color:var(--mute);cursor:pointer;transition:border-color .2s,background-color .2s,scale .2s var(--ease)}
+.proof svg{color:var(--soft-txt);margin-bottom:2px}
+.proof b{color:var(--txt);font-weight:700;font-size:14.5px}
+.proof:hover,.proof.over{border-color:var(--focus);background:var(--soft)}
+.proof:active{scale:.985}
+.proof.has{flex-direction:row;text-align:left;padding:10px;gap:12px;border-style:solid;border-color:color-mix(in srgb,var(--ok) 55%,transparent);cursor:default}
+.proof.has:active{scale:1}
+.proof.has img{width:52px;height:52px;object-fit:cover;border-radius:10px;flex:none;background:var(--s3)}
+.proof.has b{display:block;color:var(--ok)}
+.proof.has .icon-btn{width:34px;height:34px;flex:none}
+.proof-or{display:flex;align-items:center;gap:10px;margin:10px 0 8px;color:var(--dim);font-size:12px;font-weight:600}
+.proof-or::before,.proof-or::after{content:'';flex:1;height:1px;background:var(--line2)}
+.cf-proof img{display:block;max-width:100%;max-height:46vh;margin:0 auto 14px;border-radius:12px}
+@media (max-width:520px){.pk-row{grid-template-columns:1fr 92px auto}.pk-row [data-act="pk-up"]{display:none}.seg{grid-template-columns:1fr}}
 .pinfo{background:var(--s2);border:1px solid var(--line2);border-radius:14px;padding:12px 14px}
 html.theme-wa .pinfo{background:var(--soft);border-color:color-mix(in srgb,#7686ff 40%,transparent)}
 .pkv{display:grid;grid-template-columns:auto 1fr;gap:6px 12px;margin-top:8px;font-size:13.5px}
@@ -685,8 +727,20 @@ const paidOk = o => !isDirect(o) || o.payStatus === 'verificado';
 const FINAL = s => s === 'reembolsado' || s === 'cancelado';
 const RST = { pendiente: { l: 'Pendiente', c: 'warn' }, aprobada: { l: 'Aprobada', c: 'ok' }, rechazada: { l: 'Rechazada', c: 'bad' } };
 const PST = { disponible: { l: 'Disponible', c: 'ok' }, no_disponible: { l: 'No disponible', c: 'bad' }, pronto: { l: 'Disponible muy pronto', c: 'warn' } };
-const prodState = p => (p.status === 'disponible' && !(p.stock > 0)) ? { l: 'Agotado', c: 'bad' } : (PST[p.status] || PST.no_disponible);
-const canBuy = p => !!p && !p.hidden && p.status === 'disponible' && p.stock > 0;
+// productos por paquetes (recargas de juegos): cada paquete tiene su precio y no llevan stock
+const hasPacks = p => !!p && !!p.packs && Object.keys(p.packs).length > 0;
+const packList = p => Object.entries(p?.packs || {}).filter(([, v]) => v && v.n).map(([id, v]) => ({ id, n: v.n, c: v.c | 0, o: v.o ?? 0 })).sort((a, b) => a.o - b.o || a.c - b.c);
+const packOf = (p, k) => k && p?.packs?.[k] ? { id: k, ...p.packs[k] } : null;
+const fromPrice = p => hasPacks(p) ? Math.min(...packList(p).map(k => k.c)) : p.priceCents;
+const prodState = p => (p.status === 'disponible' && !hasPacks(p) && !(p.stock > 0)) ? { l: 'Agotado', c: 'bad' } : (PST[p.status] || PST.no_disponible);
+const canBuy = p => !!p && !p.hidden && p.status === 'disponible' && (hasPacks(p) || p.stock > 0);
+// una línea del carrito: nombre, precio unitario y paquete elegido
+const lineOf = it => {
+  const p = prod(it.pid); if (!p) return null;
+  if (hasPacks(p) || it.pk) { const k = packOf(p, it.pk); return k ? { p, k, name: `${p.name} · ${k.n}`, price: k.c } : { p, k: null, name: p.name, price: 0, gone: true }; }
+  return { p, k: null, name: p.name, price: p.priceCents };
+};
+const refLbl = (ref, hp) => ref ? 'Ref ' + ref : hp ? 'Con capture' : 'Sin referencia';
 
 const IC = {
   cart: '<circle cx="9" cy="20" r="1.3"/><circle cx="18" cy="20" r="1.3"/><path d="M2.5 3h2.6l2.3 11.2a2 2 0 0 0 2 1.6h7.9a2 2 0 0 0 2-1.5L21 7H6"/>',
@@ -750,7 +804,7 @@ const LS = {
 
 /* ---------------- estado ---------------- */
 const S = {
-  pay: { mode: 'saldo', m: 0, ref: '', proof: '', proofName: '' }, pmEdit: null, ud: null,
+  pay: { mode: 'saldo', m: 0, ref: '', proof: '', proofName: '' }, rc: { img: '', name: '' }, pmEdit: null, ud: null,
   route: 'tienda', settings: { ...DEFAULTS }, products: [], productsLoaded: false,
   user: null, profile: null, profileLoaded: false, registering: false,
   myOrders: [], myRecharges: [], myMoves: [],
@@ -1083,7 +1137,7 @@ function catsInUse() {
 function vStore() {
   const s = S.settings, list = S.products.filter(p => !p.hidden);
   const avail = list.filter(canBuy).length;
-  const units = list.filter(canBuy).reduce((a, p) => a + (p.stock || 0), 0);
+  const units = list.filter(p => canBuy(p) && !hasPacks(p)).reduce((a, p) => a + (p.stock || 0), 0);
   const t = String(s.heroTitle || ''), ci = t.indexOf(',');
   let wi = 0;
   const words = str => str.split(/(\s+)/).filter(Boolean).map(w => /^\s+$/.test(w) ? ' ' : `<span class="w" style="--wi:${wi++}">${esc(w)}</span>`).join('');
@@ -1147,20 +1201,21 @@ function thumbHTML(p, size) {
   return `<div class="thumb ${p.imageFit === 'contain' ? 'fit-contain' : ''}" style="--pc:${safeColor(p.color)}${size ? `;width:${size}px;height:${size}px` : ''}">${esc(initials(p.name))}${p.image ? `<img src="${esc(p.image)}" alt="" onerror="this.remove()">` : ''}</div>`;
 }
 function stockBadge(p) {
+  if (hasPacks(p)) { const n = packList(p).length; return `<span class="stock"><i></i><b>${n}</b> paquete${n === 1 ? '' : 's'}</span>`; }
   const n = p.stock || 0, cls = n <= 0 ? 'zero' : n <= 3 ? 'low' : '';
   return `<span class="stock ${cls}"><i></i><b>${n}</b> ${esc(p.unit || 'disponibles')}</span>`;
 }
 function cardHTML(p, rv = null) {
   const st = prodState(p), ok = canBuy(p);
   const rc = rv === 'wait' ? 'rv' : typeof rv === 'number' ? 'rv in' : '';
-  return `<article class="pcard ${ok ? '' : 'is-off'} ${rc}" ${typeof rv === 'number' ? `style="--d:${rv}ms"` : ''} data-act="open-product" data-id="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} · ${money(p.priceCents)} · ${st.l}">
+  return `<article class="pcard ${ok ? '' : 'is-off'} ${rc}" ${typeof rv === 'number' ? `style="--d:${rv}ms"` : ''} data-act="open-product" data-id="${p.id}" tabindex="0" role="button" aria-label="${esc(p.name)} · ${hasPacks(p) ? 'desde ' : ''}${money(fromPrice(p))} · ${st.l}">
     ${mediaHTML(p)}${stockBadge(p)}<span class="pill ${st.c}"><i></i>${st.l}</span></div>
     <div class="pbody">
       <span class="pcat">${esc(p.category || 'Otros')}</span>
       <h3>${esc(p.name)}</h3>
       <p class="pdesc">${esc(p.description || '')}</p>
-      <div class="pfoot"><span class="price">${money(p.priceCents)}</span>
-        <button class="btn btn-add btn-sm" data-act="add-cart" data-id="${p.id}" ${ok ? '' : 'disabled'}>${ok ? icon('plus', 15) + 'Agregar' : p.status === 'pronto' ? 'Pronto' : st.l === 'Agotado' ? 'Agotado' : 'No disponible'}</button>
+      <div class="pfoot"><span class="price">${hasPacks(p) ? '<span class="from">desde</span>' : ''}${money(fromPrice(p))}</span>
+        <button class="btn btn-add btn-sm" data-act="add-cart" data-id="${p.id}" ${ok ? '' : 'disabled'}>${ok ? icon('plus', 15) + (hasPacks(p) ? 'Elegir' : 'Agregar') : p.status === 'pronto' ? 'Pronto' : st.l === 'Agotado' ? 'Agotado' : 'No disponible'}</button>
       </div>
     </div>
   </article>`;
@@ -1180,6 +1235,7 @@ function flipText(el, fromEl, from, { dur = 500, reverse = false, easing = EASE 
 function openProduct(id, cardEl) {
   const p = prod(id); if (!p) return;
   const st = prodState(p), ok = canBuy(p), fields = p.fields || [];
+  const packs = packList(p), pk0 = packs[0], price0 = pk0 ? pk0.c : p.priceCents;
   const src = cardEl?.querySelector('.pmedia');
   const useShared = !!src && !REDUCED;
   const html = `
@@ -1189,10 +1245,12 @@ function openProduct(id, cardEl) {
       <span class="pcat">${esc(p.category || '')}</span>
       <h2 style="margin-top:4px"><span class="pm-title" style="display:inline-block">${esc(p.name)}</span></h2>
       <p class="muted" style="margin:10px 0 18px;white-space:pre-line">${esc(p.description || 'Sin descripción.')}</p>
+      ${packs.length ? `<div class="lb" style="margin-bottom:8px">Elige tu paquete</div><div class="packs" role="radiogroup" aria-label="Paquetes">${packs.map((k, j) => `<button type="button" class="pack ${j ? '' : 'on'}" role="radio" aria-checked="${!j}" data-act="pk-sel" data-k="${esc(k.id)}" data-c="${k.c}" ${ok ? '' : 'disabled'}><b>${esc(k.n)}</b><span class="pk-c">${money(k.c)}</span>${RATE() ? `<small>${bsOf(k.c)}</small>` : ''}</button>`).join('')}</div>` : ''}
       ${fields.length ? `<div class="infobox" style="margin-bottom:18px">Al pagar te pediremos: <b>${fields.map(esc).join(', ')}</b></div>` : ''}
       <div class="row between gap wrapf prow">
-        <span><span class="price pm-price" style="font-size:24px">${money(p.priceCents)}</span>${RATE() ? `<span class="tiny dim" style="display:block">≈ ${bsOf(p.priceCents)}</span>` : ''}</span>
-        ${ok ? `<div class="row gap"><div class="qty"><button data-act="pm-qty" data-d="-1" aria-label="Menos">${icon('minus', 15)}</button><span id="pmq">1</span><button data-act="pm-qty" data-d="1" data-max="${p.stock}" aria-label="Más">${icon('plus', 15)}</button></div>
+        <span><span class="price pm-price" style="font-size:24px">${money(price0)}</span>${RATE() ? `<span class="tiny dim" id="pm-bs" style="display:block">≈ ${bsOf(price0)}</span>` : ''}</span>
+        ${ok && pk0 ? `<button class="btn btn-pri" data-act="pm-add" data-id="${p.id}" data-pk="${esc(pk0.id)}">${icon('cart', 17)} Agregar</button>`
+      : ok ? `<div class="row gap"><div class="qty"><button data-act="pm-qty" data-d="-1" aria-label="Menos">${icon('minus', 15)}</button><span id="pmq">1</span><button data-act="pm-qty" data-d="1" data-max="${p.stock}" aria-label="Más">${icon('plus', 15)}</button></div>
           <button class="btn btn-pri" data-act="pm-add" data-id="${p.id}">${icon('cart', 17)} Agregar</button></div>`
       : `<a class="btn btn-ghost" target="_blank" rel="noopener" href="${waLink('Hola, quiero saber cuándo estará disponible: ' + p.name)}">${icon('wa', 17)} Avisarme por WhatsApp</a>`}
       </div>
@@ -1210,19 +1268,26 @@ function openProduct(id, cardEl) {
   }
 }
 
-function addToCart(id, qty = 1, srcEl, btn) {
+function addToCart(id, qty = 1, srcEl, btn, pk) {
   const p = prod(id); if (!canBuy(p)) return toast('Este producto no está disponible', 'bad');
-  const it = S.cart.find(i => i.pid === id);
-  const next = (it?.qty || 0) + qty;
-  if (next > p.stock) return toast(`Solo quedan ${p.stock} ${p.unit || 'disponibles'}`, 'bad');
-  if (it) it.qty = next; else S.cart.push({ pid: id, qty, delivery: {} });
+  let label = p.name;
+  if (hasPacks(p)) {
+    // cada paquete va en su propia línea (puede ser para otro ID de jugador)
+    const k = packOf(p, pk); if (!k) return openProduct(id);
+    S.cart.push({ pid: id, pk: k.id, qty: 1, delivery: {} }); label = `${p.name} · ${k.n}`;
+  } else {
+    const it = S.cart.find(i => i.pid === id && !i.pk);
+    const next = (it?.qty || 0) + qty;
+    if (next > p.stock) return toast(`Solo quedan ${p.stock} ${p.unit || 'disponibles'}`, 'bad');
+    if (it) it.qty = next; else S.cart.push({ pid: id, qty, delivery: {} });
+  }
   saveCart(); renderHeader(); renderBottomNav(); if (S.drawerOpen) renderDrawer(true);
   flyToCart(srcEl);
   if (btn) {
     const html = btn.innerHTML; btn.classList.add('done'); btn.innerHTML = icon('check', 15) + 'Agregado';
     setTimeout(() => { if (btn.isConnected) { btn.classList.remove('done'); btn.innerHTML = html; } }, 1300);
   }
-  if (REDUCED || !srcEl) toast(`${p.name} agregado al carrito`);
+  if (REDUCED || !srcEl) toast(`${label} agregado al carrito`);
 }
 
 /* ---- datos de pago que ve el cliente (cada dato con su botón copiar + monto exacto) ---- */
@@ -1240,6 +1305,19 @@ function payInfoHTML(m, cents) {
     ${amt ? `<div class="pamt"><span class="small">Monto exacto a pagar</span><div class="pamt-v">${amt}</div></div>` : ''}
   </div>`;
 }
+function proofPickHTML(kind, img, name) {
+  if (img) return `<div class="proof has" data-drop="${kind}"><img src="${esc(img)}" alt="Capture del pago"><div class="grow" style="min-width:0"><b>Capture listo ✓</b><span class="tiny dim" style="display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${esc(name || 'imagen')}</span></div>
+    <label class="btn btn-xs btn-ghost" style="flex:none">Cambiar<input type="file" accept="image/*" data-upload="${kind}" hidden></label><button type="button" class="icon-btn" data-act="proof-rm" data-k="${kind}" aria-label="Quitar capture">${icon('x', 15)}</button></div>`;
+  return `<label class="proof" data-drop="${kind}">${icon('image', 26)}<b>Sube el capture del pago</b><span class="tiny">Toca aquí y elige la captura de pantalla${matchMedia('(hover:hover)').matches ? ' · o arrástrala / pégala con Ctrl+V' : ''}</span><input type="file" accept="image/*" data-upload="${kind}" hidden></label>`;
+}
+function setProof(kind, img, name) {
+  if (kind === 'proof') { S.pay.proof = img; S.pay.proofName = name; renderDrawer(true); }
+  else { S.rc = { img, name }; const box = $('#rc-proof'); if (box) box.innerHTML = proofPickHTML('rcproof', img, name); }
+}
+async function loadProof(kind, file) {
+  try { setProof(kind, await fileToDataUrl(file, 1100, 1600, 'image/jpeg', .72), (file.name || 'captura.png').slice(0, 40)); toast('Capture listo'); }
+  catch (e) { toast(e.message, 'bad'); }
+}
 function rateChip() { const r = RATE(); return r > 0 ? `<span class="rate-chip">${icon('coins', 14)} Tasa del día: <b>Bs ${fmtRate(r)}</b></span>` : ''; }
 
 /* ---------------- carrito ---------------- */
@@ -1253,7 +1331,7 @@ function openDrawer() {
 function closeDrawer() { S.drawerOpen = false; $('#drawer').classList.remove('open', 'enter'); $('#ovl').classList.remove('open'); }
 function cartTotals() {
   let total = 0, problems = 0;
-  S.cart.forEach(i => { const p = prod(i.pid); if (!canBuy(p) || i.qty > p.stock) problems++; else total += p.priceCents * i.qty; });
+  S.cart.forEach(i => { const L = lineOf(i); if (!L || L.gone || !canBuy(L.p) || (!L.k && i.qty > L.p.stock)) problems++; else total += L.price * i.qty; });
   return { total, problems };
 }
 function renderDrawer(force) {
@@ -1262,17 +1340,17 @@ function renderDrawer(force) {
   pendingDrawer = false;
   const { total, problems } = cartTotals(), bal = S.profile?.balanceCents || 0;
   const items = S.cart.map((it, idx) => {
-    const p = prod(it.pid);
+    const L = lineOf(it), p = L?.p;
     if (!p) return `<div class="ci" style="--i:${idx}"><div class="row between"><span class="muted">Producto ya no existe</span><button class="btn btn-xs btn-bad" data-act="ci-rm" data-i="${idx}">Quitar</button></div></div>`;
-    const ok = canBuy(p) && it.qty <= p.stock;
+    const ok = canBuy(p) && !L.gone && (!!L.k || it.qty <= p.stock);
     return `<div class="ci" style="--i:${idx}">
       <div class="ci-top">
         ${thumbHTML(p)}
-        <div class="grow"><b style="display:block;line-height:1.3;font-weight:500">${esc(p.name)}</b><span class="mono small dim">${money(p.priceCents)} c/u</span>
-          ${ok ? '' : `<div class="bad-t tiny" style="font-weight:500">${canBuy(p) ? `Solo quedan ${p.stock}` : prodState(p).l}</div>`}</div>
-        <div style="text-align:right"><b class="mono" style="font-weight:500">${money(p.priceCents * it.qty)}</b>
+        <div class="grow"><b style="display:block;line-height:1.3;font-weight:500">${esc(p.name)}</b>${L.k ? `<span class="ci-pk">${esc(L.k.n)}</span>` : `<span class="mono small dim">${money(L.price)} c/u</span>`}
+          ${ok ? '' : `<div class="bad-t tiny" style="font-weight:500">${L.gone ? 'Este paquete ya no existe, quítalo y elige otro' : canBuy(p) ? `Solo quedan ${p.stock}` : prodState(p).l}</div>`}</div>
+        <div style="text-align:right"><b class="mono" style="font-weight:500">${money(L.price * it.qty)}</b>
           <div class="row gap" style="margin-top:6px;justify-content:flex-end;gap:6px">
-            <div class="qty"><button data-act="ci-qty" data-i="${idx}" data-d="-1" aria-label="Menos">${icon('minus', 14)}</button><span>${it.qty}</span><button data-act="ci-qty" data-i="${idx}" data-d="1" aria-label="Más">${icon('plus', 14)}</button></div>
+            ${L.k || L.gone ? '' : `<div class="qty"><button data-act="ci-qty" data-i="${idx}" data-d="-1" aria-label="Menos">${icon('minus', 14)}</button><span>${it.qty}</span><button data-act="ci-qty" data-i="${idx}" data-d="1" aria-label="Más">${icon('plus', 14)}</button></div>`}
             <button class="icon-btn" style="width:32px;height:32px" data-act="ci-rm" data-i="${idx}" aria-label="Quitar">${icon('trash', 15)}</button>
           </div></div>
       </div>
@@ -1296,8 +1374,9 @@ function renderDrawer(force) {
       ${direct ? `<div class="pd">
         <div class="pm-chips">${pms.map((m, k) => `<button class="chip ${k === P.m ? 'on' : ''}" data-act="pay-m" data-k="${k}">${esc(m.name)}</button>`).join('')}</div>
         <div class="pd-det">${payInfoHTML(pm, total)}</div>
-        <div style="margin-top:10px"><label class="lb" style="font-size:12px;margin-bottom:5px">Número de referencia *</label><input class="inp inp-sm mono" data-pay="ref" maxlength="60" value="${esc(P.ref)}" placeholder="Últimos dígitos o ID de la transacción"></div>
-        <label class="proof-btn">${icon('image', 15)}<span>${P.proof ? esc(P.proofName || 'Comprobante listo') + ' ✓' : 'Adjuntar capture del pago (opcional)'}</span><input type="file" accept="image/*" data-upload="proof" hidden></label>
+        <div style="margin-top:12px">${proofPickHTML('proof', P.proof, P.proofName)}</div>
+        <div class="proof-or">o escribe la referencia</div>
+        <input class="inp inp-sm mono" data-pay="ref" maxlength="60" value="${esc(P.ref)}" placeholder="Número de referencia${P.proof ? ' (opcional)' : ''}" aria-label="Número de referencia">
       </div>` : ''}
     </div>`;
   }
@@ -1339,7 +1418,7 @@ async function checkout(btn) {
   await busy(btn, async () => {
     const done = [], fail = [];
     for (const it of [...S.cart]) {
-      const p = prod(it.pid);
+      const p = { name: lineOf(it)?.name };
       try { const id = await buyOne(it); done.push({ id, name: p?.name, qty: it.qty }); S.cart = S.cart.filter(x => x !== it); saveCart(); }
       catch (e) { fail.push(`${p?.name || 'Producto'}: ${errMsg(e)}`); }
     }
@@ -1366,18 +1445,20 @@ async function checkoutDirect(btn) {
   const P = S.pay, pm = activePMs()[P.m];
   if (!pm) return toast('Elige un método de pago', 'bad');
   const ref = P.ref.trim();
-  if (ref.length < 3) { const el = $('[data-pay="ref"]'); el?.focus(); shake(el); return toast('Escribe el número de referencia del pago', 'bad'); }
+  if (!P.proof && ref.length < 3) { const el = $('#drawer [data-drop]'); shake(el); return toast(ref ? 'La referencia debe tener al menos 3 caracteres' : 'Sube el capture del pago o escribe la referencia', 'bad'); }
+  if (ref && ref.length < 3) { const el = $('[data-pay="ref"]'); el?.focus(); shake(el); return toast('La referencia debe tener al menos 3 caracteres', 'bad'); }
   await busy(btn, async () => {
     const { total } = cartTotals(), group = doc(collection(db, 'proofs')).id;
     const done = [], fail = [];
+    let hasProof = !!P.proof;
     if (P.proof) {
       try { await setDoc(doc(db, 'proofs', group), { uid: S.user.uid, img: P.proof, createdAt: serverTimestamp() }); }
-      catch (e) { toast('No se pudo subir el capture: ' + errMsg(e), 'bad'); }
+      catch (e) { if (!ref) return toast('No se pudo subir el capture: ' + errMsg(e), 'bad'); hasProof = false; toast('No se pudo subir el capture, enviamos solo la referencia', 'bad'); }
     }
     for (const it of [...S.cart]) {
-      const p = prod(it.pid);
+      const p = { name: lineOf(it)?.name };
       try {
-        const id = await buyOne(it, { payMode: 'directo', payMethod: pm.name.slice(0, 40), payRef: ref.slice(0, 60), payStatus: 'por_verificar', payGroup: group, payTotalCents: total, hasProof: !!P.proof, payRate: RATE(), payCurrency: pm.currency });
+        const id = await buyOne(it, { payMode: 'directo', payMethod: pm.name.slice(0, 40), payRef: ref.slice(0, 60), payStatus: 'por_verificar', payGroup: group, payTotalCents: total, hasProof, payRate: RATE(), payCurrency: pm.currency });
         done.push({ id, name: p?.name, qty: it.qty }); S.cart = S.cart.filter(x => x !== it); saveCart();
       } catch (e) { fail.push(`${p?.name || 'Producto'}: ${errMsg(e)}`); }
     }
@@ -1385,11 +1466,11 @@ async function checkoutDirect(btn) {
     if (done.length) {
       S.pay = { mode: 'saldo', m: P.m, ref: '', proof: '', proofName: '' };
       renderDrawer(true); closeDrawer();
-      const msg = `Hola, hice un pedido en ${S.settings.storeName} y pagué por ${pm.name}.\nReferencia: ${ref}\nMonto: ${pm.currency === 'BS' && bsOf(total) ? bsOf(total) + ' (' + money(total) + ')' : money(total)}\nPedidos: ${done.map(d => '#' + shortId(d.id)).join(', ')}`;
+      const msg = `Hola, hice un pedido en ${S.settings.storeName} y pagué por ${pm.name}.\nReferencia: ${ref || 'te envío el capture'}\nMonto: ${pm.currency === 'BS' && bsOf(total) ? bsOf(total) + ' (' + money(total) + ')' : money(total)}\nPedidos: ${done.map(d => '#' + shortId(d.id)).join(', ')}`;
       openModal(`<div style="text-align:center">
         <div class="ok-ic" style="width:60px;height:60px;border-radius:50%;margin:6px auto 16px;display:grid;place-items:center;background:var(--pri-bg);color:#fff;box-shadow:var(--pri-sh)"><svg class="check-draw" viewBox="0 0 24 24" width="30" height="30" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 5 5 9-10"/></svg></div>
         <h2>Pedido recibido</h2>
-        <p class="muted" style="margin:6px 0 18px">Verificaremos tu pago por <b style="color:var(--txt)">${esc(pm.name)}</b> (ref. <span class="mono">${esc(ref)}</span>) y luego procesamos tu pedido. Puedes seguirlo en Mis pedidos.</p>
+        <p class="muted" style="margin:6px 0 18px">Verificaremos tu pago por <b style="color:var(--txt)">${esc(pm.name)}</b> ${ref ? `(ref. <span class="mono">${esc(ref)}</span>)` : '(con tu capture)'} y luego procesamos tu pedido. Puedes seguirlo en Mis pedidos.</p>
         <div class="card" style="text-align:left;margin-bottom:16px;padding:6px 16px">${done.map(d => `<div class="row between small" style="padding:9px 0"><span>${esc(d.name)} × ${d.qty}</span><span class="oc-id">#${shortId(d.id)}</span></div>`).join('')}</div>
         ${fail.length ? `<div class="errbox" style="text-align:left">No se pudo pedir:<br>${fail.map(esc).join('<br>')}</div>` : ''}
         <div class="row gap"><a class="btn btn-pri grow" href="#/pedidos" data-act="close-modal">Ver mis pedidos</a>
@@ -1418,16 +1499,24 @@ async function buyOne(it, direct) {
     if (!ps.exists()) throw new Error('El producto ya no existe');
     const p = ps.data(), u = us.data();
     if (p.status !== 'disponible' || p.hidden) throw new Error('No disponible');
-    if ((p.stock || 0) < it.qty) throw new Error(`Solo quedan ${p.stock || 0}`);
-    const total = p.priceCents * it.qty;
+    const pks = hasPacks(p);
+    let price = p.priceCents, pname = p.name, extra = {};
+    if (pks) {
+      const k = it.pk && p.packs[it.pk]; if (!k) throw new Error('Ese paquete ya no existe, elígelo de nuevo');
+      price = k.c; pname = `${p.name} · ${k.n}`; extra = { packId: it.pk, pack: k.n };
+    } else {
+      if (it.pk) throw new Error('El producto cambió, agrégalo de nuevo');
+      if ((p.stock || 0) < it.qty) throw new Error(`Solo quedan ${p.stock || 0}`);
+    }
+    const total = price * it.qty;
     if (!direct && (u.balanceCents || 0) < total) throw new Error('Saldo insuficiente');
     const delivery = {}; (p.fields || []).forEach(f => delivery[f] = String(it.delivery?.[f] || '').trim().slice(0, 200));
     tx.set(oref, {
-      uid, email: S.user.email, nickname: u.nickname, pid: it.pid, pname: p.name, category: p.category || '',
-      qty: it.qty, priceCents: p.priceCents, totalCents: total, delivery, status: 'en_espera', createdAt: serverTimestamp(), ...(direct || {})
+      uid, email: S.user.email, nickname: u.nickname, pid: it.pid, pname, category: p.category || '',
+      qty: it.qty, priceCents: price, totalCents: total, delivery, status: 'en_espera', createdAt: serverTimestamp(), ...extra, ...(direct || {})
     });
     if (!direct) tx.update(uref, { balanceCents: u.balanceCents - total, lastOrderId: oref.id });
-    tx.update(pref, { stock: p.stock - it.qty, lastOrderId: oref.id });
+    if (!pks) tx.update(pref, { stock: p.stock - it.qty, lastOrderId: oref.id });
   });
   return oref.id;
 }
@@ -1511,7 +1600,9 @@ function vWallet() {
             <select class="sel" name="method" id="rc-method">${pms.map((m, k) => `<option value="${k}">${esc(m.name)}</option>`).join('')}</select></div>
           <div class="field"><label class="lb">Monto a recargar (USD)</label><input class="inp mono" name="amount" id="rc-amount" inputmode="decimal" placeholder="10.00" required><div class="hint">Es lo que se acreditará a tu saldo.</div></div>
           <div id="rc-info" style="margin-bottom:16px">${payInfoHTML(pms[0], 0)}</div>
-          <div class="field"><label class="lb">Número de referencia</label><input class="inp mono" name="reference" maxlength="60" placeholder="Últimos dígitos o ID de la transacción" required></div>
+          <div class="field"><label class="lb">Comprobante del pago</label><div id="rc-proof">${proofPickHTML('rcproof', S.rc.img, S.rc.name)}</div>
+            <div class="proof-or">o escribe la referencia</div>
+            <input class="inp mono" name="reference" maxlength="60" placeholder="Número de referencia" aria-label="Número de referencia"><div class="hint">Con el capture o la referencia basta.</div></div>
           <div class="field"><label class="lb">Nota (opcional)</label><input class="inp" name="note" maxlength="140" placeholder="Ej: pagué en Bs desde Banesco"></div>
           <button class="btn btn-pri btn-block" type="submit">Reportar pago</button>
         </form>
@@ -1519,12 +1610,12 @@ function vWallet() {
     </div>
     <div>
       ${pend.length ? `<div class="card pad" style="margin-bottom:16px" data-i="${i++}"><h3 class="h3">En verificación</h3>
-        <div class="mlist">${pend.map(r => `<div class="mi"><div class="mi-ic warn-t">${icon('clock', 17)}</div><div class="grow"><b style="font-weight:500">${esc(r.method)}</b><div class="tiny dim mono">Ref ${esc(r.reference)} · ${fdate(r.createdAt)}</div></div><span class="amt">${money(r.amountCents)}</span></div>`).join('')}</div></div>` : ''}
+        <div class="mlist">${pend.map(r => `<div class="mi"><div class="mi-ic warn-t">${icon('clock', 17)}</div><div class="grow"><b style="font-weight:500">${esc(r.method)}</b><div class="tiny dim mono">${esc(refLbl(r.reference, r.hasProof))} · ${fdate(r.createdAt)}</div></div><span class="amt">${money(r.amountCents)}</span></div>`).join('')}</div></div>` : ''}
       <div class="card pad" data-i="${i++}">
         <h3 class="h3">Movimientos</h3>
         <div class="mlist">${moves.length ? moves.slice(0, 60).map(m => `<div class="mi"><div class="mi-ic">${icon(m.ic, 17)}</div><div class="grow"><b style="font-weight:500">${esc(m.title)}</b><div class="tiny dim">${esc(m.sub)} · ${fdate(m.t)}</div></div><span class="amt ${m.amt >= 0 ? 'ok-t' : ''}">${m.amt >= 0 ? '+' : '−'}${money(Math.abs(m.amt))}</span></div>`).join('')
       : `<div class="empty">${icon('wallet', 32)}<b>Sin movimientos</b>Tus recargas y compras aparecerán aquí.</div>`}</div>
-        ${S.myRecharges.filter(r => r.status === 'rechazada').slice(0, 5).map(r => `<div class="mi" style="border-top:1px solid var(--line);padding:13px 0;display:flex;gap:12px;align-items:center"><div class="mi-ic bad-t">${icon('x', 17)}</div><div class="grow"><b style="font-weight:500">Recarga rechazada</b><div class="tiny dim">${esc(r.method)} · Ref ${esc(r.reference)}${r.adminNote ? ' · ' + esc(r.adminNote) : ''}</div></div><span class="amt dim mono">${money(r.amountCents)}</span></div>`).join('')}
+        ${S.myRecharges.filter(r => r.status === 'rechazada').slice(0, 5).map(r => `<div class="mi" style="border-top:1px solid var(--line);padding:13px 0;display:flex;gap:12px;align-items:center"><div class="mi-ic bad-t">${icon('x', 17)}</div><div class="grow"><b style="font-weight:500">Recarga rechazada</b><div class="tiny dim">${esc(r.method)} · ${esc(refLbl(r.reference, r.hasProof))}${r.adminNote ? ' · ' + esc(r.adminNote) : ''}</div></div><span class="amt dim mono">${money(r.amountCents)}</span></div>`).join('')}
       </div>
     </div>
   </div>`;
@@ -1540,6 +1631,16 @@ function stepsHTML(st, o = {}) {
   const order = ['en_espera', 'procesado', 'completado'], i = order.indexOf(st);
   return `<div class="steps">${order.map((s, k) => `${k ? `<div class="st-l ${k <= i ? 'on' : ''}"></div>` : ''}<div class="st ${k <= i ? 'on' : ''}"><i>${k < i || st === 'completado' ? '✓' : k + 1}</i>${OST[s].l}</div>`).join('')}</div>`;
 }
+// mensaje listo para WhatsApp con los datos del pedido
+const helpMsg = o => [
+  `Hola, necesito ayuda con mi pedido #${shortId(o.id)}`,
+  `Producto: ${o.pname}${o.qty > 1 ? ' × ' + o.qty : ''}`,
+  `Total: ${money(o.totalCents)}`,
+  `Estado: ${OST[o.status]?.l || o.status}`,
+  ...(isDirect(o) ? [`Pago: ${o.payMethod}${o.payRef ? ' · ref ' + o.payRef : ' · con capture'}`] : []),
+  ...Object.entries(o.delivery || {}).map(([k, v]) => `${k}: ${v}`),
+  `Usuario: ${S.profile?.nickname || o.nickname || ''}`
+].join('\n');
 function vOrders() {
   if (!S.user) return needLogin('Mis pedidos', 'Inicia sesión para ver el estado de tus compras.');
   const list = [...S.myOrders].sort((a, b) => tsMs(b.createdAt) - tsMs(a.createdAt));
@@ -1548,10 +1649,11 @@ function vOrders() {
     <div class="oc-h"><span class="oc-id">#${shortId(o.id)}</span><span class="pill ${OST[o.status]?.c || 'gray'}"><i></i>${OST[o.status]?.l || o.status}</span><span class="dim small" style="margin-left:auto">${fdate(o.createdAt)}</span></div>
     <div class="row between" style="margin-top:12px;gap:12px"><div><b style="font-size:16px;font-weight:600">${esc(o.pname)}</b> <span class="dim">× ${o.qty}</span><div class="tiny dim">${esc(o.category || '')}</div></div><b class="mono" style="font-size:17px;font-weight:500">${money(o.totalCents)}</b></div>
     ${Object.keys(o.delivery || {}).length ? `<dl class="kv" style="margin-top:12px">${Object.entries(o.delivery).map(([k, v]) => `<dt>${esc(k)}</dt><dd class="mono">${esc(v)}</dd>`).join('')}</dl>` : ''}
-    ${isDirect(o) ? `<div class="paybar"><span class="pill ${PAYST[o.payStatus]?.c || 'gray'}"><i></i>${PAYST[o.payStatus]?.l || ''}</span><span class="small muted">${esc(o.payMethod)} · ref <span class="mono">${esc(o.payRef)}</span></span></div>` : ''}
+    ${isDirect(o) ? `<div class="paybar"><span class="pill ${PAYST[o.payStatus]?.c || 'gray'}"><i></i>${PAYST[o.payStatus]?.l || ''}</span><span class="small muted">${esc(o.payMethod)} · ${o.payRef ? `ref <span class="mono">${esc(o.payRef)}</span>` : 'capture enviado'}</span></div>` : ''}
     ${stepsHTML(o.status, o)}${refundsHTML(o)}
     ${o.deliveredInfo ? `<div class="deliver"><div class="row between"><span class="small" style="font-weight:500">Datos de tu pedido</span><button class="copy" data-act="copy" data-t="${esc(o.deliveredInfo)}">${icon('copy', 13)} Copiar</button></div><pre>${esc(o.deliveredInfo)}</pre></div>` : ''}
     ${o.adminNote ? `<p class="small muted" style="margin-top:10px">Nota: ${esc(o.adminNote)}</p>` : ''}
+    ${['en_espera', 'procesado', 'completado'].includes(o.status) ? `<div class="oc-help"><a class="btn btn-sm btn-ghost" target="_blank" rel="noopener" href="${waLink(helpMsg(o))}">${icon('wa', 16)} Necesito ayuda con mi pedido</a></div>` : ''}
   </div>`).join('') : `<div class="card empty">${icon('box', 40)}<b>Aún no tienes pedidos</b>Cuando compres algo, aparecerá aquí con su estado.<div style="margin-top:18px"><a class="btn btn-pri" href="#/tienda">Ir a la tienda</a></div></div>`}`;
 }
 
@@ -1647,7 +1749,7 @@ function aSummary() {
   const todayL = valid.filter(o => isToday(o.createdAt));
   const sales = valid.reduce((a, o) => a + o.totalCents, 0), today = todayL.reduce((a, o) => a + o.totalCents, 0);
   const wallets = S.admin.users.reduce((a, u) => a + (u.balanceCents || 0), 0);
-  const lowStock = S.products.filter(p => p.status === 'disponible' && (p.stock || 0) <= 3);
+  const lowStock = S.products.filter(p => p.status === 'disponible' && !hasPacks(p) && (p.stock || 0) <= 3);
   const appr = S.admin.recharges.filter(r => r.status === 'aprobada').reduce((a, r) => a + (r.creditedCents ?? r.amountCents), 0);
   let i = 0;
   const rate = RATE();
@@ -1688,7 +1790,7 @@ function aOrdersList() {
     const grp = dir ? S.admin.orders.filter(x => x.payGroup === o.payGroup) : [];
     const payHTML = dir ? `<div class="paybox ${o.payStatus}">
         <div class="row between gap wrapf"><span class="small" style="font-weight:700">Pago directo · ${esc(o.payMethod)}</span><span class="pill ${PAYST[o.payStatus]?.c}"><i></i>${PAYST[o.payStatus]?.l}</span></div>
-        <dl class="kv" style="margin-top:8px"><dt>Referencia</dt><dd class="mono">${esc(o.payRef)}<button class="copy" data-act="copy" data-t="${esc(o.payRef)}" aria-label="Copiar">${icon('copy', 12)}</button></dd>
+        <dl class="kv" style="margin-top:8px"><dt>Referencia</dt><dd class="mono">${o.payRef ? `${esc(o.payRef)}<button class="copy" data-act="copy" data-t="${esc(o.payRef)}" aria-label="Copiar">${icon('copy', 12)}</button>` : '<span class="dim">Solo capture</span>'}</dd>
           <dt>Monto total</dt><dd class="mono">${o.payCurrency === 'BS' && o.payRate ? `<b>${bsAt(o.payTotalCents, o.payRate)}</b> · ${money(o.payTotalCents)} <span class="dim">(tasa ${fmtRate(o.payRate)})</span>` : money(o.payTotalCents)}${grp.length > 1 ? ` <span class="dim">(${grp.length} pedidos en este pago)</span>` : ''}</dd></dl>
         <div class="row gap wrapf" style="margin-top:10px">
           ${o.hasProof ? `<button class="btn btn-xs btn-ghost" data-act="see-proof" data-g="${esc(o.payGroup)}">${icon('image', 14)} Ver capture</button>` : '<span class="tiny dim">Sin capture adjunto</span>'}
@@ -1706,6 +1808,7 @@ function aOrdersList() {
         <div class="row gap wrapf" style="margin-top:16px">
           <select class="sel sel-sm" data-chg="ostatus" data-id="${o.id}" ${ref ? 'disabled' : ''}>${Object.entries(OST).filter(([k]) => !FINAL(k) || o.status === k).map(([k, v]) => `<option value="${k}" ${o.status === k ? 'selected' : ''}>${v.l}</option>`).join('')}</select>
           ${ref || unpaid ? '' : `<button class="btn btn-xs btn-bad" data-act="refund" data-id="${o.id}">${icon('undo', 14)} Reembolsar</button>`}
+          <button class="btn btn-xs btn-quiet" style="margin-left:auto" data-act="o-del" data-id="${o.id}" title="Borrar este pedido">${icon('trash', 14)} Borrar</button>
         </div>
         ${(o.refunds || []).map(x => `<div class="tiny dim" style="margin-top:8px">↩ ${money(x.cents)} · ${x.units} u. · ${x.to === 'saldo' ? 'al saldo' : 'por fuera'}${x.ref ? ' · ref ' + esc(x.ref) : ''} · ${esc(x.by || '')}</div>`).join('')}
       </div>
@@ -1733,23 +1836,23 @@ function aRechList() {
   ${list.slice(0, 200).map(r => `<tr>
     <td class="full"><div class="row gap">${avatar(userById(r.uid)?.avatar, 'sm')}<div><b style="font-weight:500">${esc(r.nickname)}</b><div class="tiny dim">${esc(r.email)}</div></div></div></td>
     <td>${esc(r.method)}${r.note ? `<div class="tiny dim">${esc(r.note)}</div>` : ''}</td>
-    <td class="mono">${esc(r.reference)}<button class="copy" data-act="copy" data-t="${esc(r.reference)}" aria-label="Copiar">${icon('copy', 12)}</button></td>
+    <td class="mono">${r.reference ? `${esc(r.reference)}<button class="copy" data-act="copy" data-t="${esc(r.reference)}" aria-label="Copiar">${icon('copy', 12)}</button>` : ''}${r.hasProof ? `<button class="btn btn-xs btn-ghost" style="margin-top:4px" data-act="see-proof" data-g="${r.id}">${icon('image', 14)} Ver capture</button>` : ''}${!r.reference && !r.hasProof ? '—' : ''}</td>
     <td class="mono">${money(r.amountCents)}${r.currency === 'BS' && r.rate ? `<div class="tiny dim">${bsAt(r.amountCents, r.rate)} · tasa ${fmtRate(r.rate)}</div>` : ''}${r.creditedCents != null && r.creditedCents !== r.amountCents ? `<div class="tiny ok-t">acreditado ${money(r.creditedCents)}</div>` : ''}</td>
     <td class="small dim">${fdate(r.createdAt)}</td>
     <td><span class="pill ${RST[r.status]?.c}"><i></i>${RST[r.status]?.l}</span>${r.adminNote ? `<div class="tiny dim">${esc(r.adminNote)}</div>` : ''}</td>
-    <td class="full">${r.status === 'pendiente' ? `<div class="row gap"><button class="btn btn-xs btn-pri" data-act="rc-ok" data-id="${r.id}">${icon('check', 14)} Aprobar</button><button class="btn btn-xs btn-bad" data-act="rc-no" data-id="${r.id}">Rechazar</button></div>` : `<span class="tiny dim">${esc(r.reviewedBy || '')}</span>`}</td>
+    <td class="full">${r.status === 'pendiente' ? `<div class="row gap"><button class="btn btn-xs btn-pri" data-act="rc-ok" data-id="${r.id}">${icon('check', 14)} Aprobar</button><button class="btn btn-xs btn-bad" data-act="rc-no" data-id="${r.id}">Rechazar</button><button class="icon-btn" style="width:30px;height:30px" data-act="rc-del" data-id="${r.id}" aria-label="Borrar recarga" title="Borrar recarga">${icon('trash', 14)}</button></div>` : `<div class="row gap" style="gap:6px"><span class="tiny dim">${esc(r.reviewedBy || '')}</span><button class="icon-btn" style="width:30px;height:30px" data-act="rc-del" data-id="${r.id}" aria-label="Borrar recarga" title="Borrar recarga">${icon('trash', 14)}</button></div>`}</td>
   </tr>`).join('')}</tbody></table></div>`;
 }
 function aProducts() {
   const P = S.products;
   return `<div class="toolbar"><button class="btn btn-pri btn-sm" data-act="p-new">${icon('plus', 15)} Nuevo producto</button>
     ${P.length ? '' : `<button class="btn btn-ghost btn-sm" data-act="p-seed">Cargar productos de ejemplo</button>`}
-    <span class="dim small" style="margin-left:auto">${P.length} productos · ${P.reduce((a, p) => a + (p.stock || 0), 0)} unidades en stock</span></div>
+    <span class="dim small" style="margin-left:auto">${P.length} productos · ${P.filter(p => !hasPacks(p)).reduce((a, p) => a + (p.stock || 0), 0)} unidades en stock</span></div>
   ${P.length ? `<div class="card tbl-wrap" data-i="0"><table class="tbl resp"><thead><tr><th>Producto</th><th>Precio</th><th>Stock</th><th>Estado</th><th></th></tr></thead><tbody>
   ${P.map(p => `<tr>
     <td class="full"><div class="row gap">${thumbHTML(p, 44)}<div><b style="font-weight:500">${esc(p.name)}</b>${p.hidden ? ' <span class="pill gray">Oculto</span>' : ''}<div class="tiny dim">${esc(p.category)} · ${esc(p.unit || 'disponibles')}${(p.fields || []).length ? ' · pide: ' + p.fields.map(esc).join(', ') : ''}</div></div></div></td>
-    <td class="mono">${money(p.priceCents)}</td>
-    <td><div class="stk"><button data-act="stk" data-id="${p.id}" data-d="-1" aria-label="Restar">${icon('minus', 14)}</button><input type="number" min="0" value="${p.stock || 0}" data-chg="stkset" data-id="${p.id}" aria-label="Stock"><button data-act="stk" data-id="${p.id}" data-d="1" aria-label="Sumar">${icon('plus', 14)}</button></div></td>
+    <td class="mono">${hasPacks(p) ? '<span class="tiny dim">desde </span>' : ''}${money(fromPrice(p))}</td>
+    <td>${hasPacks(p) ? `<span class="small muted">${packList(p).length} paquetes · sin stock</span>` : `<div class="stk"><button data-act="stk" data-id="${p.id}" data-d="-1" aria-label="Restar">${icon('minus', 14)}</button><input type="number" min="0" value="${p.stock || 0}" data-chg="stkset" data-id="${p.id}" aria-label="Stock"><button data-act="stk" data-id="${p.id}" data-d="1" aria-label="Sumar">${icon('plus', 14)}</button></div>`}</td>
     <td><select class="sel sel-sm" data-chg="pstatus" data-id="${p.id}">${Object.entries(PST).map(([k, v]) => `<option value="${k}" ${p.status === k ? 'selected' : ''}>${v.l}</option>`).join('')}</select></td>
     <td><div class="row gap" style="gap:6px"><button class="icon-btn" style="width:34px;height:34px" data-act="p-edit" data-id="${p.id}" aria-label="Editar">${icon('edit', 15)}</button><button class="icon-btn" style="width:34px;height:34px" data-act="p-del" data-id="${p.id}" aria-label="Eliminar">${icon('trash', 15)}</button></div></td>
   </tr>`).join('')}</tbody></table></div>`
@@ -1837,12 +1940,12 @@ function userDetailHTML(uid, ud) {
   let list = '';
   if (tab === 'compras') list = O.length ? O.map(o => `<div class="ud-it">
       <div class="grow"><b>${esc(o.pname)} <span class="dim" style="font-weight:400">× ${o.qty}</span></b>
-        <div class="tiny dim">#${shortId(o.id)} · ${fdate(o.createdAt)} · ${isDirect(o) ? `${esc(o.payMethod)} · ref <span class="mono">${esc(o.payRef)}</span>` : 'Pagó con saldo'}</div>
+        <div class="tiny dim">#${shortId(o.id)} · ${fdate(o.createdAt)} · ${isDirect(o) ? `${esc(o.payMethod)} · ${o.payRef ? `ref <span class="mono">${esc(o.payRef)}</span>` : 'con capture'}` : 'Pagó con saldo'}</div>
         ${(o.refunds || []).length ? `<div class="tiny warn-t">Reembolsado ${money(o.refundedCents)}</div>` : ''}</div>
       <div style="text-align:right"><b class="mono">${money(o.totalCents)}</b><div class="row gap" style="gap:4px;justify-content:flex-end;margin-top:4px">${isDirect(o) ? `<span class="pill ${PAYST[o.payStatus]?.c}"><i></i>${o.payStatus === 'verificado' ? 'Pagado' : o.payStatus === 'rechazado' ? 'Rechazado' : 'Por verificar'}</span>` : ''}<span class="pill ${OST[o.status]?.c}"><i></i>${OST[o.status]?.l}</span></div></div>
     </div>`).join('') : '<p class="muted small" style="padding:16px 0">Sin compras todavía.</p>';
   if (tab === 'recargas') list = Rc.length ? Rc.map(r => `<div class="ud-it">
-      <div class="grow"><b>${esc(r.method)}</b><div class="tiny dim">Ref <span class="mono">${esc(r.reference)}</span> · ${fdate(r.createdAt)}${r.adminNote ? ' · ' + esc(r.adminNote) : ''}</div></div>
+      <div class="grow"><b>${esc(r.method)}</b><div class="tiny dim"><span class="mono">${esc(refLbl(r.reference, r.hasProof))}</span> · ${fdate(r.createdAt)}${r.adminNote ? ' · ' + esc(r.adminNote) : ''}</div></div>
       <div style="text-align:right"><b class="mono">${money(r.creditedCents ?? r.amountCents)}</b>${r.currency === 'BS' && r.rate ? `<div class="tiny dim">${bsAt(r.amountCents, r.rate)}</div>` : ''}<div style="margin-top:4px"><span class="pill ${RST[r.status]?.c}"><i></i>${RST[r.status]?.l}</span></div></div>
     </div>`).join('') : '<p class="muted small" style="padding:16px 0">Sin recargas todavía.</p>';
   if (tab === 'saldo') list = ledger === null ? '<div class="empty" style="padding:24px"><span class="spin"></span></div>' : ledger.length ? ledger.map(m => `<div class="ud-it">
@@ -1857,7 +1960,7 @@ function userDetailHTML(uid, ud) {
       <div><span>Pedidos</span><b class="mono">${st.orders}</b></div>
       <div><span>Recargado</span><b class="mono">${money(st.recharged)}</b></div>
     </div>
-    <div class="row gap wrapf" style="gap:8px"><button class="btn btn-sm btn-ghost" data-act="u-bal" data-id="${u.id}">${icon('coins', 15)} Ajustar saldo</button><button class="btn btn-sm ${u.banned ? 'btn-ok' : 'btn-bad'}" data-act="u-ban" data-id="${u.id}">${u.banned ? 'Desbloquear' : 'Bloquear'}</button></div>
+    <div class="row gap wrapf" style="gap:8px"><button class="btn btn-sm btn-ghost" data-act="u-bal" data-id="${u.id}">${icon('coins', 15)} Ajustar saldo</button><button class="btn btn-sm ${u.banned ? 'btn-ok' : 'btn-bad'}" data-act="u-ban" data-id="${u.id}">${u.banned ? 'Desbloquear' : 'Bloquear'}</button><button class="btn btn-sm btn-quiet" style="margin-left:auto" data-act="u-del" data-id="${u.id}">${icon('trash', 15)} Borrar cliente</button></div>
     <div class="tabs" style="margin:18px 0 8px"><button class="${tab === 'compras' ? 'on' : ''}" data-act="ud-tab" data-t="compras">Compras · ${O.length}</button><button class="${tab === 'recargas' ? 'on' : ''}" data-act="ud-tab" data-t="recargas">Recargas · ${Rc.length}</button><button class="${tab === 'saldo' ? 'on' : ''}" data-act="ud-tab" data-t="saldo">Movimientos de saldo</button></div>
     <div class="ud-list">${list}</div>`;
 }
@@ -1895,7 +1998,7 @@ function pmEditorHTML() {
   return `<div class="card pad" data-i="2" style="margin-top:18px">
     <div class="row between wrapf gap" style="align-items:flex-start">
       <div><h3 class="h3">Métodos de pago</h3><p class="muted small">Tus datos para que el cliente sepa a dónde pagar. Se muestran al pagar un pedido y al recargar saldo, cada dato con su botón copiar.</p></div>
-      <div class="row gap"><select class="sel sel-sm" id="pm-add-type" aria-label="Tipo de método">${Object.entries(PM_TYPES).map(([k, v]) => `<option value="${k}">${v.l}</option>`).join('')}</select><button class="btn btn-sm btn-ghost" data-act="pm-add">${icon('plus', 15)} Agregar</button></div>
+      <div class="row gap"><select class="sel sel-sm" id="pm-add-type" aria-label="Tipo de método">${Object.entries(PM_TYPES).map(([k, v]) => `<option value="${k}">${v.l}</option>`).join('')}</select><button class="btn btn-sm btn-ghost" data-act="pmt-add">${icon('plus', 15)} Agregar</button></div>
     </div>
     <div class="pm-list">${S.pmEdit.map((m, i) => `<div class="pm-ed ${m.active ? '' : 'off'}">
       <div class="row between wrapf gap">
@@ -1923,12 +2026,23 @@ function pmSet(t) {
 }
 
 /* ---------- formulario de producto (con subida de imagen) ---------- */
-let pfImage = '';
+let pfImage = '', pfPacks = [];
+const newPackId = () => 'k' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+function pfPacksHTML() {
+  return `<div class="pk-list">${pfPacks.map((k, i) => `<div class="pk-row">
+    <input class="inp inp-sm" data-pkf="n" data-i="${i}" value="${esc(k.n)}" placeholder="Ej: 310 💎 diamantes" maxlength="40" aria-label="Nombre del paquete">
+    <div class="pk-pr"><span>$</span><input class="inp inp-sm mono" data-pkf="price" data-i="${i}" inputmode="decimal" value="${esc(k.price)}" placeholder="3.00" aria-label="Precio USD"></div>
+    <button type="button" class="icon-btn" data-act="pk-up" data-i="${i}" aria-label="Subir" ${i ? '' : 'disabled style="opacity:.35"'}>${icon('arrow', 14).replace('<svg', '<svg style="rotate:-90deg"')}</button>
+    <button type="button" class="icon-btn" data-act="pk-del" data-i="${i}" aria-label="Quitar paquete">${icon('trash', 14)}</button></div>`).join('')}</div>`;
+}
+const rerenderPacks = () => { const b = $('#pf-packs'); if (b) b.innerHTML = pfPacksHTML(); updatePfPreview(); };
 function productForm(p = {}) {
   pfImage = p.image || '';
+  pfPacks = packList(p).map(k => ({ id: k.id, n: k.n, price: (k.c / 100).toFixed(2) }));
+  const isPk = pfPacks.length > 0;
   const cats = [...new Set([...(S.settings.categories || []), ...S.products.map(x => x.category).filter(Boolean)])];
   openModal(`<button class="mclose" data-act="close-modal" aria-label="Cerrar">${icon('x', 18)}</button><h2>${p.id ? 'Editar' : 'Nuevo'} producto</h2><p class="dim small" style="margin-bottom:18px">Precios en USD.</p>
-  <form data-form="product" data-id="${p.id || ''}">
+  <form data-form="product" data-id="${p.id || ''}" class="${isPk ? 'pk-mode' : ''}">
     <div class="field"><label class="lb">Imagen</label>
       <div class="upl">
         <div id="pf-prev"></div>
@@ -1941,12 +2055,20 @@ function productForm(p = {}) {
       </div>
       <div class="hint">Se reduce automáticamente. Sin imagen, la tarjeta usa el color elegido.</div>
     </div>
+    <div class="field"><label class="lb">Tipo de precio</label>
+      <div class="seg">
+        <label><input type="radio" name="ptype" value="stock" ${isPk ? '' : 'checked'}><span>Precio único + stock</span><small>Cuentas, pantallas, gift cards</small></label>
+        <label><input type="radio" name="ptype" value="packs" ${isPk ? 'checked' : ''}><span>Paquetes</span><small>Recargas de juegos: 100 💎 $1, 310 💎 $3…</small></label>
+      </div></div>
+    <div class="field only-packs"><label class="lb">Paquetes y precios (USD)</label><div id="pf-packs">${pfPacksHTML()}</div>
+      <button type="button" class="btn btn-ghost btn-sm" data-act="pk-add">${icon('plus', 15)} Agregar paquete</button>
+      <div class="hint">El cliente elige uno. Los paquetes no llevan stock: para pausarlos cambia el Estado.</div></div>
     <div class="ac-grid" style="margin-top:0;gap:0 14px">
       <div class="field"><label class="lb">Nombre</label><input class="inp" name="name" value="${esc(p.name)}" placeholder="Netflix · 1 pantalla · 1 mes" required></div>
       <div class="field"><label class="lb">Categoría</label><input class="inp" name="category" list="catlist" value="${esc(p.category || cats[0] || '')}" required><datalist id="catlist">${cats.map(c => `<option value="${esc(c)}">`).join('')}</datalist></div>
-      <div class="field"><label class="lb">Precio (USD)</label><input class="inp mono" name="price" inputmode="decimal" value="${p.priceCents != null ? (p.priceCents / 100).toFixed(2) : ''}" required></div>
-      <div class="field"><label class="lb">Stock</label><input class="inp mono" name="stock" type="number" min="0" value="${p.stock ?? 0}" required></div>
-      <div class="field"><label class="lb">Unidad del stock</label><input class="inp" name="unit" value="${esc(p.unit || 'disponibles')}" placeholder="pantallas, cuentas, códigos…"></div>
+      <div class="field only-stock"><label class="lb">Precio (USD)</label><input class="inp mono" name="price" inputmode="decimal" value="${p.priceCents != null && !isPk ? (p.priceCents / 100).toFixed(2) : ''}"></div>
+      <div class="field only-stock"><label class="lb">Stock</label><input class="inp mono" name="stock" type="number" min="0" value="${p.stock ?? 0}"></div>
+      <div class="field only-stock"><label class="lb">Unidad del stock</label><input class="inp" name="unit" value="${esc(p.unit || 'disponibles')}" placeholder="pantallas, cuentas, códigos…"></div>
       <div class="field"><label class="lb">Estado</label><select class="sel" name="status">${Object.entries(PST).map(([k, v]) => `<option value="${k}" ${(p.status || 'disponible') === k ? 'selected' : ''}>${v.l}</option>`).join('')}</select></div>
       <div class="field"><label class="lb">Color de la tarjeta</label><input class="inp" name="color" type="color" value="${esc(/^#[0-9a-f]{6}$/i.test(p.color || '') ? p.color : '#1E3A8A')}" style="padding:4px;height:44px"></div>
       <div class="field"><label class="lb">Orden (opcional)</label><input class="inp mono" name="order" type="number" value="${p.order ?? ''}" placeholder="1 = primero"></div>
@@ -1960,7 +2082,8 @@ function productForm(p = {}) {
 }
 function updatePfPreview() {
   const f = $('#modal form[data-form="product"]'), box = $('#pf-prev'); if (!f || !box) return;
-  const p = { name: f.name.value || 'Vista previa', color: f.color.value, image: pfImage, imageFit: f.imageFit.value, stock: +f.stock.value || 0, unit: f.unit.value, status: f.status.value };
+  const packs = f.classList.contains('pk-mode') ? Object.fromEntries(pfPacks.filter(k => k.n.trim()).map((k, i) => [k.id, { n: k.n, c: toCents(k.price) || 0, o: i }])) : {};
+  const p = { name: f.name.value || 'Vista previa', color: f.color.value, image: pfImage, imageFit: f.imageFit.value, stock: +f.stock.value || 0, unit: f.unit.value, status: f.status.value, packs };
   const st = prodState(p);
   box.innerHTML = `${mediaHTML(p)}${stockBadge(p)}<span class="pill ${st.c}"><i></i>${st.l}</span></div>`;
 }
@@ -1972,7 +2095,7 @@ const SEED = [
   ['Crunchyroll · Mega Fan · 1 mes', 'Streaming', 200, 10, 'cuentas', '#b85a1f', ['Correo'], 'Anime sin anuncios.'],
   ['Spotify · Premium · 1 mes', 'Streaming', 250, 6, 'cuentas', '#1f7a45', ['Correo'], 'Cuenta individual. Sin anuncios.'],
   ['YouTube · Premium · 1 mes', 'Streaming', 300, 0, 'cuentas', '#9b1c24', ['Correo de Gmail'], 'Se activa en tu propia cuenta de Google.', 'pronto'],
-  ['Free Fire · 520 diamantes', 'Juegos', 500, 50, 'recargas', '#a8761a', ['ID de jugador'], 'Recarga directa por ID. Llega en minutos.'],
+  ['Free Fire · Diamantes', 'Juegos', 100, 0, 'paquetes', '#a8761a', ['ID de jugador'], 'Recarga directa por ID. Llega en minutos.', 'disponible', [['100 💎', 100], ['310 💎', 300], ['520 💎', 500], ['1060 💎', 1000], ['Tarjeta semanal', 250]]],
   ['PUBG Mobile · 660 UC', 'Juegos', 950, 25, 'recargas', '#8a6a2a', ['ID de jugador'], 'Recarga directa por ID.'],
   ['Roblox · 800 Robux', 'Juegos', 1000, 3, 'códigos', '#3a3f4a', ['Usuario de Roblox'], 'Código canjeable o recarga a tu cuenta.'],
   ['Steam · Gift Card $10', 'Gift Cards', 1100, 9, 'códigos', '#1f2b3a', ['Correo'], 'Código digital región USA.'],
@@ -1980,7 +2103,7 @@ const SEED = [
 ];
 async function seedProducts() {
   const b = writeBatch(db);
-  SEED.forEach(([name, category, priceCents, stock, unit, color, fields, description, status], i) => b.set(doc(collection(db, 'products')), { name, category, priceCents, stock, unit, color, fields, description, status: status || 'disponible', order: i + 1, image: '', imageFit: 'cover', hidden: false, createdAt: serverTimestamp() }));
+  SEED.forEach(([name, category, priceCents, stock, unit, color, fields, description, status, pk], i) => b.set(doc(collection(db, 'products')), { name, category, priceCents, stock, unit, color, fields, description, status: status || 'disponible', order: i + 1, image: '', imageFit: 'cover', hidden: false, packs: Object.fromEntries((pk || []).map(([n, c], o) => ['k' + o, { n, c, o }])), createdAt: serverTimestamp() }));
   await b.commit();
 }
 
@@ -2022,7 +2145,7 @@ async function closeModal(instant, opts) {
   closing = true; const seq = modalSeq;
   if (!instant && !REDUCED) {
     m.classList.add('closing');
-    const card = shared && !opts?.plain && $(`#grid .pcard[data-id="${shared.id}"]`);
+    const card = shared && !opts?.plain ? $(`#grid .pcard[data-id="${shared.id}"]`) : null;
     const cr = card?.getBoundingClientRect();
     if (card && cr.bottom > 0 && cr.top < innerHeight) {
       const pairs = sharedPairs(card);
@@ -2067,10 +2190,22 @@ const ACT = {
     if (g && !REDUCED) g.animate([{ opacity: 1 }, { opacity: 0, translate: '0 6px' }], { duration: 140, easing: 'ease-in' }).finished.then(setGrid); else setGrid();
   },
   'open-product': el => openProduct(el.dataset.id, el),
-  'add-cart': el => addToCart(el.dataset.id, 1, el.closest('.pcard')?.querySelector('.pmedia'), el),
+  'add-cart': el => { const card = el.closest('.pcard'); if (hasPacks(prod(el.dataset.id))) return openProduct(el.dataset.id, card); addToCart(el.dataset.id, 1, card?.querySelector('.pmedia'), el); },
+  'pk-sel': el => {
+    if (el.classList.contains('on')) return;
+    $$('#modal .pack').forEach(b => { const on = b === el; b.classList.toggle('on', on); b.setAttribute('aria-checked', on); });
+    const c = +el.dataset.c, pr = $('#modal .pm-price'), bs = $('#pm-bs'), add = $('#modal [data-act="pm-add"]');
+    if (pr) { pr.textContent = money(c); if (!REDUCED) pr.animate([{ opacity: .2, translate: '0 5px' }, { opacity: 1, translate: '0 0' }], { duration: 240, easing: EASE }); }
+    if (bs) bs.textContent = '≈ ' + bsOf(c);
+    if (add) add.dataset.pk = el.dataset.k;
+  },
+  'proof-rm': el => setProof(el.dataset.k, '', ''),
+  'pk-add': () => { pfPacks.push({ id: newPackId(), n: '', price: '' }); rerenderPacks(); $(`#pf-packs [data-pkf="n"][data-i="${pfPacks.length - 1}"]`)?.focus(); },
+  'pk-del': el => { pfPacks.splice(+el.dataset.i, 1); rerenderPacks(); },
+  'pk-up': el => { const i = +el.dataset.i; if (i > 0) { [pfPacks[i - 1], pfPacks[i]] = [pfPacks[i], pfPacks[i - 1]]; rerenderPacks(); } },
   'pm-qty': el => { const s = $('#pmq'), max = +($('[data-act="pm-qty"][data-max]')?.dataset.max || 99); const n = Math.min(max, Math.max(1, +s.textContent + +el.dataset.d)); if (n !== +s.textContent && !REDUCED) s.animate([{ opacity: 0, translate: `0 ${+el.dataset.d > 0 ? 6 : -6}px` }, { opacity: 1, translate: '0 0' }], { duration: 200, easing: EASE }); s.textContent = n; },
-  'pm-add': el => { const media = $('#modal .pm-media'); addToCart(el.dataset.id, +$('#pmq').textContent, media); closeModal(false, { plain: true }); },
-  'ci-qty': el => { const it = S.cart[+el.dataset.i]; if (!it) return; const p = prod(it.pid); const n = it.qty + +el.dataset.d; if (n < 1) return removeCartItem(+el.dataset.i, el); if (p && n > p.stock) return toast(`Solo quedan ${p.stock}`, 'bad'); it.qty = n; saveCart(); renderDrawer(true); renderHeader(); renderBottomNav(); },
+  'pm-add': el => { const media = $('#modal .pm-media'); addToCart(el.dataset.id, el.dataset.pk ? 1 : +$('#pmq').textContent, media, null, el.dataset.pk); closeModal(false, { plain: true }); },
+  'ci-qty': el => { const it = S.cart[+el.dataset.i]; if (!it || it.pk) return; const p = prod(it.pid); const n = it.qty + +el.dataset.d; if (n < 1) return removeCartItem(+el.dataset.i, el); if (p && n > p.stock) return toast(`Solo quedan ${p.stock}`, 'bad'); it.qty = n; saveCart(); renderDrawer(true); renderHeader(); renderBottomNav(); },
   'ci-rm': el => removeCartItem(+el.dataset.i, el),
   'checkout': el => checkout(el),
   'copy': el => copyText(el.dataset.t),
@@ -2098,7 +2233,7 @@ const ACT = {
     if (el.dataset.done) { if (!info && !(await confirmBox('¿Completar sin datos?', 'El cliente no verá datos de entrega.', 'Completar'))) return; upd.status = 'completado'; }
     try { await updateDoc(doc(db, 'orders', id), upd); DIRTY.delete('#di-' + id); toast(el.dataset.done ? 'Pedido completado' : 'Entrega guardada'); } catch (e) { toast(errMsg(e), 'bad'); }
   }),
-  'pm-add': () => { const t = $('#pm-add-type').value; S.pmEdit.push({ id: 'pm' + Date.now().toString(36), type: t, name: PM_TYPES[t].l, currency: PM_TYPES[t].cur, data: {}, note: '', active: true }); renderView(true); },
+  'pmt-add': () => { const t = $('#pm-add-type').value; S.pmEdit.push({ id: 'pm' + Date.now().toString(36), type: t, name: PM_TYPES[t].l, currency: PM_TYPES[t].cur, data: {}, note: '', active: true }); renderView(true); },
   'pm-del': async el => { const i = +el.dataset.i, m = S.pmEdit[i]; if (!(await confirmBox('Eliminar método', `¿Quitar <b>${esc(m.name)}</b>? Se aplica al guardar.`, 'Quitar'))) return; S.pmEdit.splice(i, 1); renderView(true); },
   'pm-up': el => { const i = +el.dataset.i; [S.pmEdit[i - 1], S.pmEdit[i]] = [S.pmEdit[i], S.pmEdit[i - 1]]; renderView(true); },
   'pm-reset': () => { S.pmEdit = null; renderView(true); toast('Cambios descartados', 'info'); },
@@ -2123,14 +2258,16 @@ const ACT = {
     const g = el.dataset.g, grp = S.admin.orders.filter(o => o.payGroup === g && o.payStatus === 'por_verificar' && !FINAL(o.status));
     if (!grp.length) return;
     const o = grp[0];
-    if (!(await confirmBox('Confirmar pago', `¿Recibiste <b>${o.payCurrency === 'BS' && o.payRate ? bsAt(o.payTotalCents, o.payRate) + ' (' + money(o.payTotalCents) + ')' : money(o.payTotalCents)}</b> por <b>${esc(o.payMethod)}</b> con referencia <b class="mono">${esc(o.payRef)}</b>?<br>Se marcarán como pagados ${grp.length} pedido(s).`, 'Sí, pago recibido'))) return;
+    const cf = confirmBox('Confirmar pago', `¿Recibiste <b>${o.payCurrency === 'BS' && o.payRate ? bsAt(o.payTotalCents, o.payRate) + ' (' + money(o.payTotalCents) + ')' : money(o.payTotalCents)}</b> por <b>${esc(o.payMethod)}</b> ${o.payRef ? `con referencia <b class="mono">${esc(o.payRef)}</b>` : '(revisa el capture)'}?<br>Se marcarán como pagados ${grp.length} pedido(s).`, 'Sí, pago recibido', o.hasProof ? '<div class="cf-proof" id="cf-proof"></div>' : '');
+    if (o.hasProof) showProofIn(g);
+    if (!(await cf)) return;
     try { const b = writeBatch(db); grp.forEach(x => b.update(doc(db, 'orders', x.id), { payStatus: 'verificado', payCheckedBy: S.profile.nickname, updatedAt: serverTimestamp() })); await b.commit(); toast('Pago verificado. Ya puedes procesar el pedido'); }
     catch (e) { toast(errMsg(e), 'bad'); }
   },
   'pay-no': async el => {
     const g = el.dataset.g, grp = S.admin.orders.filter(o => o.payGroup === g && !FINAL(o.status));
     if (!grp.length) return;
-    const r = await confirmBox('Rechazar pago', `Se cancelarán ${grp.length} pedido(s).`, 'Rechazar y cancelar', `<label class="row gap small" style="margin-bottom:4px"><input type="checkbox" name="restock" checked> Devolver las unidades al stock</label><div class="hint" style="margin:0 0 14px">Desmárcalo si el stock estaba mal y no tienes esas unidades.</div><div class="field"><label class="lb">Motivo (lo verá el cliente)</label><input class="inp" name="note" placeholder="Ej: referencia no encontrada"></div>`);
+    const r = await confirmBox('Rechazar pago', `Se cancelarán ${grp.length} pedido(s).`, 'Rechazar y cancelar', `${grp.every(x => x.packId) ? '' : '<label class="row gap small" style="margin-bottom:4px"><input type="checkbox" name="restock" checked> Devolver las unidades al stock</label><div class="hint" style="margin:0 0 14px">Desmárcalo si el stock estaba mal y no tienes esas unidades.</div>'}<div class="field"><label class="lb">Motivo (lo verá el cliente)</label><input class="inp" name="note" placeholder="Ej: referencia no encontrada"></div>`);
     if (!r) return;
     try { for (const x of grp) await cancelOrder(x.id, r.note, r.restock); toast('Pago rechazado y pedidos cancelados', 'info'); }
     catch (e) { toast(errMsg(e), 'bad'); }
@@ -2144,8 +2281,8 @@ const ACT = {
         <label class="row gap small" style="margin:4px 0 8px"><input type="radio" name="to" value="saldo" ${toDef === 'saldo' ? 'checked' : ''}> A su saldo en la tienda (se acredita al instante)</label>
         <label class="row gap small"><input type="radio" name="to" value="externo" ${toDef === 'externo' ? 'checked' : ''}> Se lo devolví por fuera (Pago Móvil, Binance, Zinli…)</label></div>
       <div class="field"><label class="lb">Referencia de la devolución (si fue por fuera)</label><input class="inp mono" name="rref" maxlength="60" placeholder="Opcional"></div>
-      <label class="row gap small" style="margin-bottom:4px"><input type="checkbox" name="restock" checked> Devolver las unidades al stock</label>
-      <div class="hint" style="margin:0 0 14px">Desmárcalo si el stock estaba mal y en realidad no tienes esas unidades.</div>
+      ${o.packId ? '' : `<label class="row gap small" style="margin-bottom:4px"><input type="checkbox" name="restock" checked> Devolver las unidades al stock</label>
+      <div class="hint" style="margin:0 0 14px">Desmárcalo si el stock estaba mal y en realidad no tienes esas unidades.</div>`}
       <div class="field"><label class="lb">Motivo (lo verá el cliente)</label><input class="inp" name="note" placeholder="Ej: nos quedamos sin pantallas disponibles"></div>`);
     if (!r) return;
     const units = Math.min(o.qty, Math.max(1, parseInt(r.units || o.qty)));
@@ -2154,8 +2291,10 @@ const ACT = {
   },
   'rc-ok': async el => {
     const rc = S.admin.recharges.find(x => x.id === el.dataset.id); if (!rc) return;
-    const r = await confirmBox('Aprobar recarga', `Verifica la referencia <b class="mono">${esc(rc.reference)}</b> (${esc(rc.method)}) antes de aprobar.`, 'Aprobar y acreditar',
-      `<div class="field"><label class="lb">Monto a acreditar (USD)</label><input class="inp mono" name="amount" value="${(rc.amountCents / 100).toFixed(2)}"></div>`);
+    const cf = confirmBox('Aprobar recarga', `Verifica ${rc.reference ? `la referencia <b class="mono">${esc(rc.reference)}</b>` : 'el capture'} (${esc(rc.method)}) antes de aprobar.`, 'Aprobar y acreditar',
+      `${rc.hasProof ? '<div class="cf-proof" id="cf-proof"></div>' : ''}<div class="field"><label class="lb">Monto a acreditar (USD)</label><input class="inp mono" name="amount" value="${(rc.amountCents / 100).toFixed(2)}"></div>`);
+    if (rc.hasProof) showProofIn(rc.id);
+    const r = await cf;
     if (!r) return;
     const cents = toCents(r.amount); if (!(cents > 0)) return toast('Monto inválido', 'bad');
     try { await approveRecharge(rc.id, cents); toast(`Acreditados ${money(cents)} a ${rc.nickname}`); } catch (e) { toast(errMsg(e), 'bad'); }
@@ -2165,6 +2304,38 @@ const ACT = {
     const r = await confirmBox('Rechazar recarga', `La recarga de ${money(rc.amountCents)} de ${esc(rc.nickname)} no se acreditará.`, 'Rechazar', `<div class="field"><label class="lb">Motivo (lo verá el cliente)</label><input class="inp" name="note" placeholder="Ej: referencia no encontrada"></div>`);
     if (!r) return;
     try { await updateDoc(doc(db, 'recharges', rc.id), { status: 'rechazada', adminNote: r.note || '', reviewedAt: serverTimestamp(), reviewedBy: S.profile.nickname }); toast('Recarga rechazada', 'info'); } catch (e) { toast(errMsg(e), 'bad'); }
+  },
+  'o-del': async el => {
+    const o = S.admin.orders.find(x => x.id === el.dataset.id); if (!o) return;
+    const r = await confirmBox('Borrar pedido', `Se borrará el pedido <b>#${shortId(o.id)}</b> · ${esc(o.pname)} de <b>${esc(o.nickname)}</b>. No se puede deshacer.${!isDirect(o) && !FINAL(o.status) ? '<br><span class="warn-t">Lo pagó con saldo: borrarlo no le devuelve el dinero. Si debes devolverlo, usa Reembolsar primero.</span>' : ''}`, 'Borrar pedido', restockBox([o]));
+    if (!r) return;
+    try { await runOps(orderDelOps([o], r.restock)); toast('Pedido borrado', 'info'); } catch (e) { toast(errMsg(e), 'bad'); }
+  },
+  'rc-del': async el => {
+    const rc = S.admin.recharges.find(x => x.id === el.dataset.id); if (!rc) return;
+    const r = await confirmBox('Borrar recarga', `Se borrará la recarga de <b>${money(rc.amountCents)}</b> de <b>${esc(rc.nickname)}</b>. No se puede deshacer.${rc.status === 'aprobada' ? '<br><span class="warn-t">Ya fue aprobada: el saldo acreditado no se descuenta. Si debes quitarlo, usa Ajustar saldo en el cliente.</span>' : ''}`, 'Borrar recarga');
+    if (!r) return;
+    try { await runOps([['d', doc(db, 'recharges', rc.id)], ...(rc.hasProof ? [['d', doc(db, 'proofs', rc.id)]] : [])]); toast('Recarga borrada', 'info'); } catch (e) { toast(errMsg(e), 'bad'); }
+  },
+  'u-del': async el => {
+    const u = userById(el.dataset.id); if (!u) return;
+    const O = S.admin.orders.filter(o => o.uid === u.id), Rc = S.admin.recharges.filter(x => x.uid === u.id);
+    const back = S.ud ? { uid: S.ud.uid, tab: S.ud.tab } : null;
+    const r = await confirmBox('Borrar cliente', `Se borrará <b>${esc(u.nickname)}</b> con <b>${O.length}</b> pedido(s), <b>${Rc.length}</b> recarga(s) y su historial de saldo. No se puede deshacer.`, 'Borrar todo',
+      `${restockBox(O)}<div class="field"><label class="lb">Escribe <b>${esc(u.nickname)}</b> para confirmar</label><input class="inp" name="conf" autocomplete="off"></div><div class="hint" style="margin:-6px 0 14px">Su acceso (correo y contraseña) queda en Firebase → Authentication; bórralo allí si quieres que no pueda volver a entrar.</div>`);
+    if (!r) { if (back) openUserDetail(back.uid, back.tab); return; }
+    if ((r.conf || '').trim().toLowerCase() !== u.nickname.toLowerCase()) { toast('El nombre no coincide. No se borró nada.', 'bad'); if (back) openUserDetail(back.uid, back.tab); return; }
+    try {
+      const mv = await getDocs(query(collection(db, 'movements'), where('uid', '==', u.id)));
+      await runOps([
+        ...orderDelOps(O, r.restock),
+        ...Rc.flatMap(x => [['d', doc(db, 'recharges', x.id)], ...(x.hasProof ? [['d', doc(db, 'proofs', x.id)]] : [])]),
+        ...mv.docs.map(d => ['d', d.ref]),
+        ['d', doc(db, 'nicknames', String(u.nickname).toLowerCase())],
+        ['d', doc(db, 'users', u.id)]
+      ]);
+      toast(`${u.nickname} y su historial fueron borrados`, 'info');
+    } catch (e) { toast(errMsg(e), 'bad'); }
   },
   'p-new': () => productForm(),
   'p-edit': el => productForm(prod(el.dataset.id)),
@@ -2211,7 +2382,20 @@ document.addEventListener('input', e => {
   if (t.dataset.pm != null) { pmSet(t); return; }
   if (t.dataset.cf != null) { const it = S.cart[+t.dataset.cf]; if (it) { (it.delivery ||= {})[t.dataset.fk] = t.value; saveCart(); } return; }
   if (t.hasAttribute('data-asearch')) { S.aq = t.value; const fn = { pedidos: aOrdersList, recargas: aRechList, usuarios: aUsersList }[S.atab]; if (fn) $('#alist').innerHTML = fn(); return; }
+  if (t.dataset.pkf) { const k = pfPacks[+t.dataset.i]; if (k) k[t.dataset.pkf] = t.value; updatePfPreview(); return; }
   if (t.form?.dataset.form === 'product') { if (t.name === 'imageUrl') pfImage = t.value.trim(); updatePfPreview(); }
+});
+// arrastrar o pegar (Ctrl+V) el capture del pago
+document.addEventListener('dragover', e => { const z = e.target.closest?.('[data-drop]'); if (z) { e.preventDefault(); z.classList.add('over'); } });
+document.addEventListener('dragleave', e => e.target.closest?.('[data-drop]')?.classList.remove('over'));
+document.addEventListener('drop', e => {
+  const z = e.target.closest?.('[data-drop]'); if (!z) return; e.preventDefault(); z.classList.remove('over');
+  const f = [...(e.dataTransfer?.files || [])].find(x => x.type.startsWith('image/')); if (f) loadProof(z.dataset.drop, f);
+});
+document.addEventListener('paste', e => {
+  const f = [...(e.clipboardData?.files || [])].find(x => x.type.startsWith('image/')); if (!f) return;
+  const kind = S.drawerOpen && $('#drawer [data-drop]') ? 'proof' : $('#rc-proof') ? 'rcproof' : null;
+  if (kind) { e.preventDefault(); loadProof(kind, f); }
 });
 document.addEventListener('change', async e => {
   const t = e.target;
@@ -2221,11 +2405,17 @@ document.addEventListener('change', async e => {
   if (t.dataset.upload) {
     const file = t.files?.[0]; t.value = ''; if (!file) return;
     try {
-      if (t.dataset.upload === 'proof') { S.pay.proof = await fileToDataUrl(file, 1100, 1600, 'image/jpeg', .72); S.pay.proofName = file.name.slice(0, 40); renderDrawer(true); toast('Capture adjuntado'); }
+      if (t.dataset.upload === 'proof' || t.dataset.upload === 'rcproof') { await loadProof(t.dataset.upload, file); }
       else if (t.dataset.upload === 'product') { pfImage = await fileToDataUrl(file, 960, 960, 'image/webp', .84); const f = $('#modal form[data-form="product"]'); if (f) f.imageUrl.value = ''; updatePfPreview(); }
       else { setLogo = await fileToDataUrl(file, 256, 256, file.type === 'image/svg+xml' ? 'image/png' : 'image/webp', .9); $('#logo-prev').innerHTML = `<img src="${setLogo}" alt="">`; }
     } catch (err) { toast(err.message, 'bad'); }
     return;
+  }
+  if (t.name === 'ptype' && t.form?.dataset.form === 'product') {
+    const pk = t.value === 'packs'; t.form.classList.toggle('pk-mode', pk);
+    if (pk && !pfPacks.length) { pfPacks.push({ id: newPackId(), n: '', price: '' }); rerenderPacks(); }
+    if (pk && !t.form.fields.value.trim()) t.form.fields.value = 'ID de jugador';
+    updatePfPreview(); return;
   }
   if (t.form?.dataset.form === 'product') { updatePfPreview(); return; }
   const k = t.dataset.chg; if (!k) return;
@@ -2385,21 +2575,34 @@ const FORMS = {
     if (!(cents > 0)) return toast('Escribe un monto válido', 'bad');
     if (cents < min) return toast(`La recarga mínima es ${money(min)}`, 'bad');
     if (cents > 1000000) return toast('Monto demasiado alto', 'bad');
-    const reference = f.reference.value.trim(); if (reference.length < 3) return toast('Escribe la referencia del pago', 'bad');
+    const reference = f.reference.value.trim(), img = S.rc.img;
+    if (!img && reference.length < 3) { shake($('#rc-proof')); return toast(reference ? 'La referencia debe tener al menos 3 caracteres' : 'Sube el capture del pago o escribe la referencia', 'bad'); }
+    if (reference && reference.length < 3) { shake(f.reference); return toast('La referencia debe tener al menos 3 caracteres', 'bad'); }
     await busy(f.querySelector('[type=submit]'), async () => {
       try {
-        await addDoc(collection(db, 'recharges'), { uid: S.user.uid, email: S.user.email, nickname: S.profile.nickname, amountCents: cents, method: pm.name.slice(0, 40), reference: reference.slice(0, 60), note: f.note.value.trim().slice(0, 140), status: 'pendiente', createdAt: serverTimestamp(), rate: RATE(), currency: pm.currency });
-        f.reset(); clearDirty('recharge|'); updateRcInfo();
+        const rref = doc(collection(db, 'recharges')), b = writeBatch(db);
+        if (img) b.set(doc(db, 'proofs', rref.id), { uid: S.user.uid, img, createdAt: serverTimestamp() });
+        b.set(rref, { uid: S.user.uid, email: S.user.email, nickname: S.profile.nickname, amountCents: cents, method: pm.name.slice(0, 40), reference: reference.slice(0, 60), hasProof: !!img, note: f.note.value.trim().slice(0, 140), status: 'pendiente', createdAt: serverTimestamp(), rate: RATE(), currency: pm.currency });
+        await b.commit();
+        f.reset(); clearDirty('recharge|'); setProof('rcproof', '', ''); updateRcInfo();
         toast('Pago reportado. Te acreditaremos al verificarlo.');
       } catch (e) { toast(errMsg(e), 'bad'); }
     });
   },
   async product(f) {
-    const id = f.dataset.id, price = toCents(f.price.value);
-    if (!(price >= 0)) return toast('Precio inválido', 'bad');
+    const id = f.dataset.id, pk = f.classList.contains('pk-mode'), packs = {};
+    let price = toCents(f.price.value);
+    if (pk) {
+      const rows = pfPacks.map(k => ({ id: k.id, n: String(k.n).trim().slice(0, 40), c: toCents(k.price), raw: String(k.price).trim() })).filter(k => k.n || k.raw);
+      if (!rows.length) return toast('Agrega al menos un paquete con su precio', 'bad');
+      const bad = rows.find(k => !k.n || !(k.c > 0));
+      if (bad) return toast(bad.n ? `Precio inválido en "${bad.n}"` : 'A un paquete le falta el nombre', 'bad');
+      rows.forEach((k, o) => packs[k.id] = { n: k.n, c: k.c, o });
+      price = Math.min(...rows.map(k => k.c));
+    } else if (!(price >= 0) || !f.price.value.trim()) return toast('Precio inválido', 'bad');
     const data = {
       name: f.name.value.trim(), category: f.category.value.trim() || 'Otros', priceCents: price,
-      stock: Math.max(0, parseInt(f.stock.value) || 0), unit: f.unit.value.trim() || 'disponibles', status: f.status.value,
+      stock: pk ? 0 : Math.max(0, parseInt(f.stock.value) || 0), unit: pk ? 'paquetes' : (f.unit.value.trim() || 'disponibles'), status: f.status.value, packs,
       color: f.color.value, image: pfImage || '', imageFit: f.imageFit.value === 'contain' ? 'contain' : 'cover', description: f.description.value.trim(),
       fields: f.fields.value.split(',').map(s => s.trim()).filter(Boolean).slice(0, 6), hidden: f.hidden.checked,
       order: f.order.value === '' ? 999 : +f.order.value
@@ -2429,6 +2632,32 @@ const FORMS = {
 document.addEventListener('submit', e => { const f = e.target, h = FORMS[f.dataset.form]; if (h) { e.preventDefault(); h(f); } });
 
 /* ---------------- operaciones de admin ---------------- */
+// carga el capture dentro de un cuadro de confirmación ya abierto
+async function showProofIn(id) {
+  try { const sn = await getDoc(doc(db, 'proofs', id)); const b = $('#cf-proof'); if (b && sn.exists()) b.innerHTML = `<a href="${esc(sn.data().img)}" target="_blank" rel="noopener"><img src="${esc(sn.data().img)}" alt="Capture del pago"></a>`; } catch { }
+}
+// borrados de registros (pruebas, errores). Se hacen en lotes.
+async function runOps(ops) {
+  for (let i = 0; i < ops.length; i += 400) {
+    const b = writeBatch(db);
+    ops.slice(i, i + 400).forEach(([t, r, d]) => t === 'd' ? b.delete(r) : b.update(r, d));
+    await b.commit();
+  }
+}
+function orderDelOps(list, restock) {
+  const ops = [], ids = new Set(list.map(o => o.id)), groups = new Set(), inc = {};
+  list.forEach(o => {
+    ops.push(['d', doc(db, 'orders', o.id)]);
+    if (o.payGroup) groups.add(o.payGroup);
+    if (restock && !FINAL(o.status) && !o.packId) inc[o.pid] = (inc[o.pid] || 0) + o.qty;
+  });
+  // el capture se borra si ya no queda ningún pedido de ese pago
+  groups.forEach(g => { if (!S.admin.orders.some(x => x.payGroup === g && !ids.has(x.id))) ops.push(['d', doc(db, 'proofs', g)]); });
+  Object.entries(inc).forEach(([pid, n]) => { if (prod(pid)) ops.push(['u', doc(db, 'products', pid), { stock: increment(n) }]); });
+  return ops;
+}
+const restockBox = list => list.some(o => !FINAL(o.status) && !o.packId && prod(o.pid))
+  ? `<label class="row gap small" style="margin-bottom:4px"><input type="checkbox" name="restock" checked> Devolver las unidades al stock</label><div class="hint" style="margin:0 0 14px">Desmárcalo si no tienes esas unidades.</div>` : '';
 async function approveRecharge(id, cents) {
   await runTransaction(db, async tx => {
     const rref = doc(db, 'recharges', id), rs = await tx.get(rref);
@@ -2437,7 +2666,7 @@ async function approveRecharge(id, cents) {
     const uref = doc(db, 'users', r.uid), us = await tx.get(uref); if (!us.exists()) throw new Error('El usuario no existe');
     tx.update(rref, { status: 'aprobada', creditedCents: cents, reviewedAt: serverTimestamp(), reviewedBy: S.profile.nickname });
     tx.update(uref, { balanceCents: increment(cents) });
-    tx.set(doc(collection(db, 'movements')), { uid: r.uid, type: 'recarga', amountCents: cents, note: `${r.method} · Ref ${r.reference}`, ref: id, by: S.profile.nickname, createdAt: serverTimestamp() });
+    tx.set(doc(collection(db, 'movements')), { uid: r.uid, type: 'recarga', amountCents: cents, note: `${r.method} · ${refLbl(r.reference, r.hasProof)}`, ref: id, by: S.profile.nickname, createdAt: serverTimestamp() });
   });
 }
 async function cancelOrder(id, note, restock = true) {
@@ -2446,7 +2675,7 @@ async function cancelOrder(id, note, restock = true) {
     if (FINAL(o.status)) return;
     const pref = doc(db, 'products', o.pid), ps = await tx.get(pref);
     tx.update(oref, { status: 'cancelado', payStatus: 'rechazado', adminNote: note || '', updatedAt: serverTimestamp(), payCheckedBy: S.profile.nickname });
-    if (restock && ps.exists()) tx.update(pref, { stock: increment(o.qty) });
+    if (restock && !o.packId && ps.exists()) tx.update(pref, { stock: increment(o.qty) });
   });
 }
 async function refundOrder(id, { units, restock, to, rref, note }) {
@@ -2456,7 +2685,7 @@ async function refundOrder(id, { units, restock, to, rref, note }) {
     if (isDirect(o) && o.payStatus !== 'verificado') throw new Error('El pago no está verificado: usa "Rechazar pago"');
     units = Math.min(o.qty, Math.max(1, units || o.qty));
     const amount = o.priceCents * units, full = units >= o.qty;
-    const pref = doc(db, 'products', o.pid), ps = restock ? await tx.get(pref) : null;
+    const pref = doc(db, 'products', o.pid), ps = restock && !o.packId ? await tx.get(pref) : null;
     const log = [...(o.refunds || []), { units, cents: amount, to, ref: rref || '', note: note || '', at: Date.now(), by: S.profile.nickname }];
     tx.update(oref, {
       ...(full ? { status: 'reembolsado', refundedAt: serverTimestamp() } : { qty: o.qty - units, totalCents: o.totalCents - amount }),
