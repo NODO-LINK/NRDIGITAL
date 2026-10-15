@@ -89,6 +89,15 @@ header.top{position:sticky;top:0;z-index:40;background:var(--hdr-bg);-webkit-bac
 .badge{position:absolute;top:-6px;right:-6px;min-width:18px;height:18px;padding:0 5px;border-radius:9px;background:var(--navy);color:#fff;font-size:10.5px;font-weight:600;font-family:var(--mono);display:grid;place-items:center;border:2px solid var(--bg)}
 .av{width:36px;height:36px;border-radius:10px;display:grid;place-items:center;font-size:18px;flex:none;background:var(--avc,#1E3A8A);box-shadow:inset 0 0 0 1px rgba(255,255,255,.08)}
 .av.lg{width:80px;height:80px;font-size:40px;border-radius:22px}
+.av.has-ph{overflow:hidden;background:var(--s3)}.av.has-ph img{width:100%;height:100%;object-fit:cover;display:block}
+.av.xl{width:112px;height:112px;font-size:54px;border-radius:30px}
+.av.two{font-size:12px;letter-spacing:-1px;white-space:nowrap}.av.sm.two{font-size:10px}.av.lg.two{font-size:26px}.av.xl.two{font-size:38px}
+.ph-row{display:flex;gap:8px;flex-wrap:wrap;align-items:center}
+.av-free{display:flex;gap:8px;align-items:center;margin:10px 0 18px}
+.av-free .inp{max-width:230px}
+.col-any{position:relative;width:32px;height:32px;border-radius:9px;overflow:hidden;cursor:pointer;background:conic-gradient(#f44,#fd4,#4f6,#4df,#64f,#f4d,#f44);box-shadow:inset 0 0 0 1px rgba(255,255,255,.15)}
+.col-any input{position:absolute;inset:-6px;width:calc(100% + 12px);height:calc(100% + 12px);opacity:0;cursor:pointer}
+.unsaved{display:none;margin-left:10px;color:var(--warn);font-size:13px;font-weight:600}.unsaved.on{display:inline}
 .av.sm{width:30px;height:30px;font-size:15px;border-radius:8px}
 .announce{background:var(--navy);color:#e6ecfa;text-align:center;font-size:13px;font-weight:500;padding:8px 16px}
 
@@ -288,7 +297,7 @@ footer{border-top:1px solid var(--line);margin-top:80px;padding:40px 0 120px;col
 .emo-grid button.on{border-color:var(--navy);background:var(--navy-a)}
 .col-grid{display:flex;gap:8px;flex-wrap:wrap}
 .col-grid button{width:32px;height:32px;border-radius:9px;box-shadow:inset 0 0 0 1px rgba(255,255,255,.1);transition:scale .2s var(--ease)}
-.col-grid button.on{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--txt)}
+.col-grid button.on,.col-any.on{box-shadow:0 0 0 2px var(--bg),0 0 0 4px var(--txt)}
 
 /* ---------- admin ---------- */
 .atabs{display:flex;gap:4px;overflow-x:auto;scrollbar-width:none;border-bottom:1px solid var(--line);margin-bottom:24px}
@@ -374,7 +383,7 @@ html.theme-wa .icon-btn:hover{border-color:transparent;filter:brightness(1.15)}
 html.theme-wa .bal-chip{border-radius:999px;background:var(--soft);border-color:transparent;height:40px;padding:0 15px 0 12px}
 html.theme-wa .bal-chip svg{color:var(--soft-txt)}
 html.theme-wa .av{border-radius:50%}
-html.theme-wa .av.lg{border-radius:50%}
+html.theme-wa .av.lg,html.theme-wa .av.xl{border-radius:50%}
 html.theme-wa .badge{background:var(--amber);color:#1a1300;font-weight:800}
 html.theme-wa .announce{background:var(--pri-bg);color:#fff;font-weight:700;border-radius:16px;width:calc(100% - 32px);max-width:1200px;margin:10px auto 0}
 /* botones / campos */
@@ -723,10 +732,15 @@ const NICK_RE = /^[A-Za-z0-9_.-]{3,16}$/;
 const AV_EMOJI = ['🎮', '👾', '🕹️', '🐉', '⚔️', '🔥', '💀', '🦊', '🐺', '🤖', '👑', '⚡', '🦅', '🐍', '🎯', '🚀', '🥷', '🧠', '💎', '🌀', '🦈', '🐼', '👻', '🏆'];
 const AV_COLOR = ['#1E3A8A', '#27324a', '#3f3f46', '#1f4d3a', '#47305e', '#6b2c2c', '#6b4e1f', '#1e4a5a', '#18181b'];
 const parseAv = a => { const [e, c] = String(a || '').split('|'); return { e: e || '🎮', c: c || '#1E3A8A' }; };
-const avatar = (a, cls = '') => { const v = parseAv(a); return `<span class="av ${cls}" style="--avc:${esc(v.c)}">${esc(v.e)}</span>`; };
+const safePhoto = p => typeof p === 'string' && /^data:image\/(webp|jpeg|png);base64,/.test(p) ? p : '';
+const gCount = t => { try { return [...new Intl.Segmenter('es', { granularity: 'grapheme' }).segment(t)].length; } catch { return [...t].length; } };
+const avatar = (a, cls = '', photo = '') => { const v = parseAv(a), ph = safePhoto(photo), two = !ph && gCount(v.e) > 1; return `<span class="av ${cls} ${ph ? 'has-ph' : ''} ${two ? 'two' : ''}" style="--avc:${esc(v.c)}">${ph ? `<img src="${ph}" alt="">` : esc(v.e)}</span>`; };
+const avOf = (u, cls = '') => avatar(u?.avatar, cls, u?.photo);
+// emoji o letras libres: máximo 2 caracteres visibles
+const firstGraphemes = (t, n = 2) => { t = String(t || '').replace(/[|\s]/g, ''); if (!t) return ''; try { return [...new Intl.Segmenter('es', { granularity: 'grapheme' }).segment(t)].slice(0, n).map(x => x.segment).join('').slice(0, 16); } catch { return [...t].slice(0, n).join('').slice(0, 16); } };
 const randomAv = () => AV_EMOJI[Math.floor(Math.random() * AV_EMOJI.length)] + '|' + AV_COLOR[Math.floor(Math.random() * 8)];
 
-const OST = { en_espera: { l: 'En espera', c: 'warn' }, procesado: { l: 'Procesado', c: 'blue' }, completado: { l: 'Completado', c: 'ok' }, reembolsado: { l: 'Reembolsado', c: 'bad' }, cancelado: { l: 'Cancelado', c: 'gray' } };
+const OST = { en_espera: { l: 'En espera', c: 'warn' }, procesado: { l: 'Procesando', c: 'blue' }, completado: { l: 'Completado', c: 'ok' }, reembolsado: { l: 'Reembolsado', c: 'bad' }, cancelado: { l: 'Cancelado', c: 'gray' } };
 const PAYST = { por_verificar: { l: 'Pago por verificar', c: 'warn' }, verificado: { l: 'Pago verificado', c: 'ok' }, rechazado: { l: 'Pago rechazado', c: 'bad' } };
 const isDirect = o => o.payMode === 'directo';
 const paidOk = o => !isDirect(o) || o.payStatus === 'verificado';
@@ -1061,7 +1075,7 @@ function renderHeader() {
     <span class="brand">${logoHTML()}<span>${esc(s.storeName)}<small>Panel de administración</small></span></span>
     <div class="top-r">
       <a class="btn btn-ghost btn-sm" href="index.html" target="_blank" rel="noopener">${icon('store', 15)}<span class="hide-m">Ver tienda</span></a>
-      ${S.profile ? `<span class="row gap small" style="gap:8px">${avatar(S.profile.avatar, 'sm')}<span class="hide-m">${esc(S.profile.nickname)}</span></span>
+      ${S.profile ? `<span class="row gap small" style="gap:8px">${avOf(S.profile, 'sm')}<span class="hide-m">${esc(S.profile.nickname)}</span></span>
       <button class="icon-btn" data-act="logout" aria-label="Salir" title="Salir">${icon('logout', 17)}</button>` : ''}
     </div>`);
     return;
@@ -1074,7 +1088,7 @@ function renderHeader() {
       ${S.user && S.profile ? `<a class="bal-chip" href="#/billetera" title="Tu saldo" ${r !== 'billetera' ? 'style="view-transition-name:bal"' : ''}>${icon('wallet', 16)}${mAnim('hdr', S.profile.balanceCents)}</a>` : ''}
       <button class="icon-btn hide-m" data-act="open-cart" aria-label="Carrito">${icon('cart', 18)}${cartCount() ? `<span class="badge">${cartCount()}</span>` : ''}</button>
       ${S.user
-      ? `<a href="#/perfil" title="${esc(S.profile?.nickname || '')}" ${r !== 'perfil' ? 'style="view-transition-name:me-av;border-radius:50%"' : ''}>${avatar(S.profile?.avatar)}</a>`
+      ? `<a href="#/perfil" title="${esc(S.profile?.nickname || '')}" ${r !== 'perfil' ? 'style="view-transition-name:me-av;border-radius:50%"' : ''}>${avOf(S.profile)}</a>`
       : `<button class="btn btn-pri btn-sm" data-act="login">Ingresar</button>`}
     </div>`);
   runMoneyAnims(); syncInd('nav');
@@ -1594,7 +1608,7 @@ function vWallet() {
   <div class="two">
     <div>
       <div class="balance-card" data-i="${i++}">
-        <div class="row between"><span class="lbl">Saldo disponible</span>${avatar(S.profile.avatar, 'sm')}</div>
+        <div class="row between"><span class="lbl">Saldo disponible</span>${avOf(S.profile, 'sm')}</div>
         <div class="amt"><span style="view-transition-name:bal;display:inline-block">${mAnim('wal', S.profile.balanceCents)}</span></div>
         <div class="row between small" style="color:rgba(255,255,255,.7)"><span>${esc(S.profile.nickname)}</span><span class="mono">USD</span></div>
       </div>
@@ -1664,7 +1678,34 @@ function vOrders() {
 }
 
 /* ---------------- perfil ---------------- */
-let draftAv = null;
+let draftAv = null, draftPhoto;   // draftPhoto: undefined = sin cambios · '' = quitar · dataURL = nueva foto
+const curPhoto = () => draftPhoto !== undefined ? draftPhoto : (S.profile?.photo || '');
+function photoCtlHTML() {
+  const has = !!curPhoto();
+  return `<label class="btn btn-ghost btn-sm">${icon('image', 15)} ${has ? 'Cambiar foto' : 'Subir mi foto'}<input type="file" accept="image/*" data-upload="avatar" hidden></label>${has ? '<button type="button" class="btn btn-quiet btn-sm" data-act="av-ph-rm">Quitar foto</button>' : ''}`;
+}
+// recorta al centro en cuadrado y la deja liviana para guardarla en la base de datos
+function avatarFromFile(file, size = 256) {
+  return new Promise((res, rej) => {
+    if (!file?.type?.startsWith('image/')) return rej(new Error('Elige un archivo de imagen'));
+    const img = new Image(), url = URL.createObjectURL(file);
+    img.onload = () => {
+      const w = img.naturalWidth, h = img.naturalHeight, m = Math.min(w, h);
+      const c = document.createElement('canvas'); c.width = c.height = size;
+      const g = c.getContext('2d'); g.imageSmoothingQuality = 'high';
+      g.drawImage(img, (w - m) / 2, (h - m) / 2, m, m, 0, 0, size, size);
+      URL.revokeObjectURL(url);
+      let q = .85, d = c.toDataURL('image/webp', q);
+      const type = d.startsWith('data:image/webp') ? 'image/webp' : 'image/jpeg';
+      if (type !== 'image/webp') d = c.toDataURL(type, q);
+      while (d.length > 60000 && q > .4) { q -= .1; d = c.toDataURL(type, q); }
+      if (d.length > 75000) return rej(new Error('No se pudo reducir la imagen, prueba con otra'));
+      res(d);
+    };
+    img.onerror = () => { URL.revokeObjectURL(url); rej(new Error('No se pudo leer la imagen')); };
+    img.src = url;
+  });
+}
 function vProfile() {
   if (!S.user) return needLogin('Tu perfil', 'Crea tu cuenta y personaliza tu apodo.');
   if (!S.profile) return `<div class="empty"><span class="spin"></span></div>`;
@@ -1672,7 +1713,7 @@ function vProfile() {
   return `<div class="page-h"><div><h1>Perfil</h1><p>Personaliza tu apodo y avatar.</p></div></div>
   <div class="two">
     <div class="card pad" style="text-align:center" data-i="0">
-      <div style="display:flex;justify-content:center"><span style="view-transition-name:me-av;border-radius:50%">${avatar(a.e + '|' + a.c, 'lg')}</span></div>
+      <div style="display:flex;justify-content:center"><span id="av-big" style="view-transition-name:me-av;border-radius:50%">${avatar(a.e + '|' + a.c, 'xl', curPhoto())}</span></div>
       <h2 style="margin-top:14px;font-size:22px">${esc(S.profile.nickname)}</h2>
       <p class="dim small">${esc(S.user.email)}</p>
       ${isAdmin() ? '<span class="pill blue" style="margin-top:10px"><i></i>Administrador</span>' : ''}
@@ -1685,11 +1726,16 @@ function vProfile() {
     <div class="card pad" data-i="1">
       <form data-form="profile">
         <div class="field"><label class="lb">Apodo gamer</label><input class="inp" name="nick" maxlength="16" value="${esc(S.profile.nickname)}" required><div class="hint">3–16 caracteres: letras, números, _ . - · Debe ser único.</div></div>
-        <label class="lb">Avatar</label>
-        <div class="emo-grid" style="margin-bottom:18px">${AV_EMOJI.map(e => `<button type="button" class="${a.e === e ? 'on' : ''}" data-act="av-e" data-v="${e}">${e}</button>`).join('')}</div>
-        <label class="lb">Color</label>
-        <div class="col-grid" style="margin-bottom:22px">${AV_COLOR.map(c => `<button type="button" class="${a.c === c ? 'on' : ''}" style="background:${c}" data-act="av-c" data-v="${c}" aria-label="${c}"></button>`).join('')}</div>
-        <button class="btn btn-pri" type="submit">Guardar perfil</button>
+        <label class="lb">Tu foto</label>
+        <div class="ph-row" id="ph-ctl">${photoCtlHTML()}</div>
+        <div class="hint" style="margin-bottom:18px">Sube una imagen de tu galería; se recorta en cuadrado. Si eliges un emoji, la foto se quita.</div>
+        <label class="lb">O elige un emoji</label>
+        <div class="emo-grid">${AV_EMOJI.map(e => `<button type="button" class="${!curPhoto() && a.e === e ? 'on' : ''}" data-act="av-e" data-v="${e}">${e}</button>`).join('')}</div>
+        <div class="av-free"><input class="inp inp-sm" id="av-custom" data-keep="av-custom" maxlength="16" placeholder="…o escribe cualquier emoji o letras (máx. 2)" value="${AV_EMOJI.includes(a.e) ? '' : esc(a.e)}" autocomplete="off"></div>
+        <label class="lb">Color de fondo</label>
+        <div class="col-grid" style="margin-bottom:22px">${AV_COLOR.map(c => `<button type="button" class="${a.c === c ? 'on' : ''}" style="background:${c}" data-act="av-c" data-v="${c}" aria-label="${c}"></button>`).join('')}
+          <label class="col-any ${AV_COLOR.includes(a.c) ? '' : 'on'}" title="Cualquier color"><input type="color" id="av-color" value="${/^#[0-9a-f]{6}$/i.test(a.c) ? a.c : '#6a00ff'}" aria-label="Elegir cualquier color"></label></div>
+        <button class="btn btn-pri" type="submit">Guardar perfil</button><span class="unsaved ${draftAv != null || draftPhoto !== undefined ? 'on' : ''}" id="av-unsaved">Cambios sin guardar</span>
       </form>
     </div>
   </div>`;
@@ -1766,7 +1812,7 @@ function aSummary() {
   <div class="stats">
     <div class="card stat" data-i="${i++}"><span>Ventas hoy</span><b>${mAnim('a-today', today)}</b><small>${todayL.length} pedidos</small></div>
     <div class="card stat" data-i="${i++}"><span>Ventas totales</span><b>${mAnim('a-sales', sales)}</b><small>${valid.length} pedidos pagados</small></div>
-    <div class="card stat" data-i="${i++}"><span>Pedidos en espera</span><b class="${pendingOrders() ? 'warn-t' : ''}">${pendingOrders()}</b><small>${O.filter(o => o.status === 'procesado').length} procesados sin completar</small></div>
+    <div class="card stat" data-i="${i++}"><span>Pedidos en espera</span><b class="${pendingOrders() ? 'warn-t' : ''}">${pendingOrders()}</b><small>${O.filter(o => o.status === 'procesado').length} procesando</small></div>
     <div class="card stat" data-i="${i++}"><span>Pagos directos por verificar</span><b class="${payPend.length ? 'warn-t' : ''}">${new Set(payPend.map(o => o.payGroup)).size}</b><small>${money(payPend.reduce((a, o) => a + o.totalCents, 0))} en pedidos</small></div>
     <div class="card stat" data-i="${i++}"><span>Recargas pendientes</span><b class="${pendingRech() ? 'warn-t' : ''}">${pendingRech()}</b><small>${money(S.admin.recharges.filter(r => r.status === 'pendiente').reduce((a, r) => a + r.amountCents, 0))} por verificar</small></div>
     <div class="card stat" data-i="${i++}"><span>Saldo en billeteras</span><b>${mAnim('a-wal', wallets)}</b><small>${money(appr)} recargado en total</small></div>
@@ -1774,7 +1820,7 @@ function aSummary() {
   </div>
   <div class="ac-grid" style="margin-top:0">
     <div class="card pad" data-i="${i++}"><div class="row between" style="margin-bottom:6px"><h3 class="h3" style="margin:0">Últimos pedidos</h3><button class="btn btn-xs btn-ghost" data-act="atab" data-t="pedidos">Ver todos</button></div>
-      <div class="mlist">${O.slice(0, 7).map(o => `<div class="mi">${avatar(userById(o.uid)?.avatar, 'sm')}<div class="grow"><b style="font-weight:500">${esc(o.pname)} × ${o.qty}</b><div class="tiny dim">${esc(o.nickname)} · ${fdate(o.createdAt)}</div></div><span class="amt">${money(o.totalCents)}</span><span class="pill ${OST[o.status]?.c}"><i></i>${OST[o.status]?.l}</span></div>`).join('') || '<p class="muted small">Sin pedidos todavía.</p>'}</div></div>
+      <div class="mlist">${O.slice(0, 7).map(o => `<div class="mi">${avOf(userById(o.uid), 'sm')}<div class="grow"><b style="font-weight:500">${esc(o.pname)} × ${o.qty}</b><div class="tiny dim">${esc(o.nickname)} · ${fdate(o.createdAt)}</div></div><span class="amt">${money(o.totalCents)}</span><span class="pill ${OST[o.status]?.c}"><i></i>${OST[o.status]?.l}</span></div>`).join('') || '<p class="muted small">Sin pedidos todavía.</p>'}</div></div>
     <div class="card pad" data-i="${i++}"><div class="row between" style="margin-bottom:6px"><h3 class="h3" style="margin:0">Stock bajo</h3><button class="btn btn-xs btn-ghost" data-act="atab" data-t="productos">Inventario</button></div>
       <div class="mlist">${lowStock.map(p => `<div class="mi">${thumbHTML(p, 36)}<div class="grow"><b style="font-weight:500">${esc(p.name)}</b><div class="tiny dim">${esc(p.category)}</div></div><span class="pill ${p.stock ? 'warn' : 'bad'}"><i></i>${p.stock || 0} ${esc(p.unit || '')}</span></div>`).join('') || '<p class="muted small">Todo el inventario disponible tiene más de 3 unidades.</p>'}</div></div>
   </div>`;
@@ -1804,7 +1850,7 @@ function aOrdersList() {
         </div></div>` : '';
     return `<div class="card ac" data-i="${i}">
     <div class="oc-h"><span class="oc-id">#${shortId(o.id)}</span><span class="pill ${OST[o.status]?.c}"><i></i>${OST[o.status]?.l}</span><span class="dim small">${fdate(o.createdAt)}</span>
-      <span style="margin-left:auto" class="row gap">${avatar(userById(o.uid)?.avatar, 'sm')}<span><b style="font-weight:500">${esc(o.nickname)}</b><div class="tiny dim">${esc(o.email)}</div></span></span></div>
+      <span style="margin-left:auto" class="row gap">${avOf(userById(o.uid), 'sm')}<span><b style="font-weight:500">${esc(o.nickname)}</b><div class="tiny dim">${esc(o.email)}</div></span></span></div>
     <div class="ac-grid">
       <div>
         <div class="row between"><b style="font-size:15.5px;font-weight:600">${esc(o.pname)} <span class="dim" style="font-weight:400">× ${o.qty}</span></b><b class="mono" style="font-weight:500">${money(o.totalCents)}</b></div>
@@ -1840,7 +1886,7 @@ function aRechList() {
   if (!list.length) return `<div class="card empty">${icon('wallet', 36)}<b>Sin recargas aquí</b></div>`;
   return `<div class="card tbl-wrap" data-i="0"><table class="tbl resp"><thead><tr><th>Usuario</th><th>Método</th><th>Referencia</th><th>Monto</th><th>Fecha</th><th>Estado</th><th></th></tr></thead><tbody>
   ${list.slice(0, 200).map(r => `<tr>
-    <td class="full"><div class="row gap">${avatar(userById(r.uid)?.avatar, 'sm')}<div><b style="font-weight:500">${esc(r.nickname)}</b><div class="tiny dim">${esc(r.email)}</div></div></div></td>
+    <td class="full"><div class="row gap">${avOf(userById(r.uid), 'sm')}<div><b style="font-weight:500">${esc(r.nickname)}</b><div class="tiny dim">${esc(r.email)}</div></div></div></td>
     <td>${esc(r.method)}${r.note ? `<div class="tiny dim">${esc(r.note)}</div>` : ''}</td>
     <td class="mono">${r.reference ? `${esc(r.reference)}<button class="copy" data-act="copy" data-t="${esc(r.reference)}" aria-label="Copiar">${icon('copy', 12)}</button>` : ''}${r.hasProof ? `<button class="btn btn-xs btn-ghost" style="margin-top:4px" data-act="see-proof" data-g="${r.id}">${icon('image', 14)} Ver capture</button>` : ''}${!r.reference && !r.hasProof ? '—' : ''}</td>
     <td class="mono">${money(r.amountCents)}${r.currency === 'BS' && r.rate ? `<div class="tiny dim">${bsAt(r.amountCents, r.rate)} · tasa ${fmtRate(r.rate)}</div>` : ''}${r.creditedCents != null && r.creditedCents !== r.amountCents ? `<div class="tiny ok-t">acreditado ${money(r.creditedCents)}</div>` : ''}</td>
@@ -1909,7 +1955,7 @@ function aUsersList() {
   if (!list.length) return `<div class="card empty">${icon('users', 36)}<b>Sin usuarios</b></div>`;
   return `<div class="card tbl-wrap" data-i="0"><table class="tbl resp"><thead><tr><th>Cliente</th><th>Saldo</th><th>Comprado</th><th>Pedidos</th><th></th></tr></thead><tbody>
   ${list.slice(0, 300).map(u => { const st = userStats(u.id); return `<tr class="clickrow" data-act="u-open" data-id="${u.id}">
-    <td class="full"><div class="row gap">${avatar(u.avatar, 'sm')}<div><b style="font-weight:500">${esc(u.nickname)}</b>${u.banned ? ' <span class="pill bad">Bloqueado</span>' : ''}<div class="tiny dim">${esc(u.email)} · desde ${fdate(u.createdAt)}</div></div></div></td>
+    <td class="full"><div class="row gap">${avOf(u, 'sm')}<div><b style="font-weight:500">${esc(u.nickname)}</b>${u.banned ? ' <span class="pill bad">Bloqueado</span>' : ''}<div class="tiny dim">${esc(u.email)} · desde ${fdate(u.createdAt)}</div></div></div></td>
     <td class="mono"><span class="tiny dim hide-d">Saldo </span>${money(u.balanceCents)}</td>
     <td class="mono"><span class="tiny dim hide-d">Comprado </span>${money(st.spent)}</td>
     <td><span class="tiny dim hide-d">Pedidos </span>${st.orders}</td>
@@ -1959,7 +2005,7 @@ function userDetailHTML(uid, ud) {
       <b class="mono ${m.amt >= 0 ? 'ok-t' : ''}">${m.amt >= 0 ? '+' : '−'}${money(Math.abs(m.amt))}</b>
     </div>`).join('') : '<p class="muted small" style="padding:16px 0">Sin movimientos de saldo.</p>';
   return `<button class="mclose" data-act="close-modal" aria-label="Cerrar">${icon('x', 18)}</button>
-    <div class="row gap" style="gap:14px;padding-right:40px">${avatar(u.avatar, 'lg')}<div class="grow"><h2 style="margin:0">${esc(u.nickname)}</h2><div class="small muted">${esc(u.email)}</div><div class="tiny dim">Cliente desde ${fdate(u.createdAt)}${u.banned ? ' · <span class="bad-t">Bloqueado</span>' : ''}</div></div></div>
+    <div class="row gap" style="gap:14px;padding-right:40px">${avOf(u, 'lg')}<div class="grow"><h2 style="margin:0">${esc(u.nickname)}</h2><div class="small muted">${esc(u.email)}</div><div class="tiny dim">Cliente desde ${fdate(u.createdAt)}${u.banned ? ' · <span class="bad-t">Bloqueado</span>' : ''}</div></div></div>
     <div class="ud-stats">
       <div><span>Saldo actual</span><b class="mono">${money(u.balanceCents)}</b></div>
       <div><span>Total comprado</span><b class="mono">${money(st.spent)}</b></div>
@@ -2128,7 +2174,7 @@ const routeFromHash = () => { if (MODE === 'admin') return 'admin'; const r = (l
 window.addEventListener('hashchange', () => {
   if (MODE === 'admin') return;
   const next = routeFromHash(); if (next === S.route) return;
-  const go = () => { S.route = next; S.aq = ''; draftAv = null; setLogo = null; clearDirty(); closeModal(true); closeDrawer(); renderAll(true); window.scrollTo(0, 0); };
+  const go = () => { S.route = next; S.aq = ''; draftAv = null; draftPhoto = undefined; setLogo = null; clearDirty(); closeModal(true); closeDrawer(); renderAll(true); window.scrollTo(0, 0); };
   if (!VT_OK || REDUCED || document.hidden) return go();
   const root = document.documentElement; root.classList.add('vt-page');
   try { const vt = document.startViewTransition(go); vt.finished.finally(() => root.classList.remove('vt-page')); }
@@ -2223,7 +2269,8 @@ const ACT = {
   },
   'forgot': async () => { const em = $('#modal [name="email"]')?.value.trim(); if (!em) return authErr('Escribe tu correo y vuelve a tocar "¿Olvidaste tu contraseña?"'); try { await sendPasswordResetEmail(auth, em); authErr(''); toast('Te enviamos un correo para cambiar la contraseña'); } catch (e) { authErr(errMsg(e)); } },
   'reset-pw': async () => { try { await sendPasswordResetEmail(auth, S.user.email); toast('Revisa tu correo para cambiar la contraseña'); } catch (e) { toast(errMsg(e), 'bad'); } },
-  'av-e': el => { const a = parseAv(draftAv ?? S.profile.avatar); draftAv = el.dataset.v + '|' + a.c; refreshAvatarPicker(); },
+  'av-e': el => { const a = parseAv(draftAv ?? S.profile.avatar); draftAv = el.dataset.v + '|' + a.c; if (curPhoto()) draftPhoto = ''; const ci = $('#av-custom'); if (ci) ci.value = ''; refreshAvatarPicker(); },
+  'av-ph-rm': () => { draftPhoto = ''; refreshAvatarPicker(); },
   'av-c': el => { const a = parseAv(draftAv ?? S.profile.avatar); draftAv = a.e + '|' + el.dataset.v; refreshAvatarPicker(); },
   // admin
   'atab': el => { S.atab = el.dataset.t; S.aq = ''; setLogo = null; S.pmEdit = null; clearDirty(); renderView(true); },
@@ -2385,6 +2432,8 @@ document.addEventListener('input', e => {
   if (t.id === 'q') { S.q = t.value; setGrid(); return; }
   if (t.dataset.pay) { S.pay[t.dataset.pay] = t.value; return; }
   if (t.id === 'rc-amount') updateRcInfo();
+  if (t.id === 'av-custom') { const e = firstGraphemes(t.value); if (e) { const a = parseAv(draftAv ?? S.profile.avatar); draftAv = e + '|' + a.c; if (curPhoto()) draftPhoto = ''; refreshAvatarPicker(); } return; }
+  if (t.id === 'av-color') { const a = parseAv(draftAv ?? S.profile.avatar); draftAv = a.e + '|' + t.value; refreshAvatarPicker(); return; }
   if (t.dataset.pm != null) { pmSet(t); return; }
   if (t.dataset.cf != null) { const it = S.cart[+t.dataset.cf]; if (it) { (it.delivery ||= {})[t.dataset.fk] = t.value; saveCart(); } return; }
   if (t.hasAttribute('data-asearch')) { S.aq = t.value; const fn = { pedidos: aOrdersList, recargas: aRechList, usuarios: aUsersList }[S.atab]; if (fn) $('#alist').innerHTML = fn(); return; }
@@ -2412,6 +2461,7 @@ document.addEventListener('change', async e => {
     const file = t.files?.[0]; t.value = ''; if (!file) return;
     try {
       if (t.dataset.upload === 'proof' || t.dataset.upload === 'rcproof') { await loadProof(t.dataset.upload, file); }
+      else if (t.dataset.upload === 'avatar') { draftPhoto = await avatarFromFile(file); refreshAvatarPicker(); toast('Foto lista. Toca "Guardar perfil"'); }
       else if (t.dataset.upload === 'product') { pfImage = await fileToDataUrl(file, 960, 960, 'image/webp', .84); const f = $('#modal form[data-form="product"]'); if (f) f.imageUrl.value = ''; updatePfPreview(); }
       else { setLogo = await fileToDataUrl(file, 256, 256, file.type === 'image/svg+xml' ? 'image/png' : 'image/webp', .9); $('#logo-prev').innerHTML = `<img src="${setLogo}" alt="">`; }
     } catch (err) { toast(err.message, 'bad'); }
@@ -2439,11 +2489,13 @@ function updateRcInfo() {
   box.innerHTML = payInfoHTML(m, c > 0 ? c : 0);
 }
 function refreshAvatarPicker() {
-  const a = parseAv(draftAv);
-  $$('[data-act="av-e"]').forEach(b => b.classList.toggle('on', b.dataset.v === a.e));
+  const a = parseAv(draftAv ?? S.profile?.avatar);
+  const big = $('#av-big'); if (big) { big.innerHTML = avatar(a.e + '|' + a.c, 'xl', curPhoto()); if (!REDUCED) big.firstChild.animate([{ scale: .85 }, { scale: 1 }], { duration: 320, easing: 'cubic-bezier(.3,1.5,.5,1)' }); }
+  const ctl = $('#ph-ctl'); if (ctl) ctl.innerHTML = photoCtlHTML();
+  $('#av-unsaved')?.classList.toggle('on', draftAv != null || draftPhoto !== undefined);
+  $('.col-any')?.classList.toggle('on', !AV_COLOR.includes(a.c));
+  $$('[data-act="av-e"]').forEach(b => b.classList.toggle('on', !curPhoto() && b.dataset.v === a.e));
   $$('[data-act="av-c"]').forEach(b => b.classList.toggle('on', b.dataset.v === a.c));
-  const big = $('#view .av.lg');
-  if (big) { big.textContent = a.e; big.style.setProperty('--avc', a.c); if (!REDUCED) big.animate([{ scale: .85 }, { scale: 1 }], { duration: 320, easing: 'cubic-bezier(.3,1.5,.5,1)' }); }
 }
 
 /* ---------------- formularios ---------------- */
@@ -2569,8 +2621,8 @@ const FORMS = {
           b.set(doc(db, 'nicknames', nick.toLowerCase()), { uid });
           b.delete(doc(db, 'nicknames', old.toLowerCase()));
         }
-        b.update(doc(db, 'users', uid), { nickname: nick, avatar: av });
-        await b.commit(); draftAv = null; clearDirty('profile|'); toast('Perfil actualizado');
+        b.update(doc(db, 'users', uid), { nickname: nick, avatar: av, ...(draftPhoto !== undefined ? { photo: draftPhoto } : {}) });
+        await b.commit(); draftAv = null; draftPhoto = undefined; clearDirty('profile|'); clearDirty('av-'); toast('Perfil actualizado');
       } catch (e) { toast(errMsg(e), 'bad'); }
     });
   },
